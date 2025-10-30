@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+a {
+  text-decoration: none;
+  color: red;
+}
+span {
+  font-size: 0.9em;
+}
+input[type] {
+  outline: none;
+  padding: 5px;
+  width: 100%;
+}
+p {
+  opacity: 50%;
+}
+
+button {
+  outline: none;
+  padding: 5px;
+  border: none;
+  background-color: rgb(63, 63, 222);
+  border-radius: 3px;
+  font-size: 0.9em;
+  width: 100%;
+  color: white;
+  cursor: pointer;
+}
+button:hover {
+  background-color: rgb(75, 75, 241);
+}
