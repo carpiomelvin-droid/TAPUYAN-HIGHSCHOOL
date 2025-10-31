@@ -99,7 +99,6 @@ if ($EmployeeID) {
     <title>Tapuyan National High School</title>
 </head>
 <style>
-    /* (Your existing styles) */
     button {
         margin-top: 20px;
         padding: 10px;
@@ -198,7 +197,7 @@ if ($EmployeeID) {
             </div>
             <div class="field">
                 <label for="name">Name *</label>
-                <input id="name" name="name" type="text" required maxlength="150" placeholder="Cruz, John Michael, M" value="<?php echo htmlspecialchars($details['name']); ?>" readonly>
+                <input id="name" name="name" type="text" required maxlength="150" placeholder="Surname, Firstname, MI" value="<?php echo htmlspecialchars($details['name']); ?>" readonly>
             </div>
             <div class="field">
                 <label for="position">Position</label>
