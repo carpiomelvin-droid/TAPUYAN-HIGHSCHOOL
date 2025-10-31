@@ -162,13 +162,6 @@ $search_query = $_GET['search_query'] ?? '';
             <input type="submit" value="Create Account" class="btn-create-account">
         </form>
     </div>
-
-    <script>
-        // --- 6. JAVASCRIPT TO SHOW THE POPUP ---
-        document.getElementById('create-account').addEventListener('click', function() {
-            document.getElementById('create-account-form').style.display = 'block';
-        });
-    </script>
 </body>
 
 </html>
