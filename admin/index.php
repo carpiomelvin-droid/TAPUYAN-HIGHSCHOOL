@@ -23,7 +23,7 @@ if ($stmt_admin) {
     $stmt_admin->close();
 }
 
-// --- 2. GET SEARCH TERM ---
+
 $search_query = $_GET['search_query'] ?? '';
 
 ?>
@@ -52,15 +52,17 @@ $search_query = $_GET['search_query'] ?? '';
 
         <div class="menu-admin" style="width: 200px; padding: 15px; background: #fafafa;">
             <ul>
-                <li>Dashboard</li>
+                <li><a href="index.php">Dashboard</a></li>
                 <li id="create-account" style="cursor: pointer; color: blue;">Create Employee Account</li>
+
+                <li><a href="editadminaccount.php">Edit My Account</a></li>
                 <li>
                     <form action="../controllers/logout.php" method="post">
                         <button type="submit" class="btn-logout">Logout</button>
                     </form>
                 </li>
             </ul>
-        </div>
+        </div>>
 
         <div style="flex: 1; padding: 15px;">
             <h2>Employee List</h2>
