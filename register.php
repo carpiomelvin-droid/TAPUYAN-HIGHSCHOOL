@@ -1,10 +1,6 @@
 <?php
 session_start();
 include_once './db/conn.php';
-include_once './includes/header.php';
-
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">

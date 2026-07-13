@@ -11,7 +11,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
 $EmployeeID = $_SESSION['EmployeeID'];
 
 // 3. Fetch admin's display name for header
-$admin_display_name = $_SESSION['username'] ?? 'Admin'; // Fallback
+$admin_display_name = $_SESSION['username'] ?? 'Admin';
 $sql_name = "SELECT name FROM employee_details WHERE EmployeeID = ? LIMIT 1";
 $stmt_name = $conn->prepare($sql_name);
 if ($stmt_name) {
@@ -49,24 +49,19 @@ $conn->close();
     <title>Edit My Account</title>
     <style>
         :root {
-            --primary-color: #007bff;
-            --primary-hover: #0056b3;
             --danger-color: #dc3545;
-            --danger-hover: #c82333;
-            --success-color: #28a745;
-            --success-hover: #218838;
-            --secondary-color: #6c757d;
-            --secondary-hover: #5a6268;
+            --success-color: #ffff00ff;
+            --success-hover: #f4f408ff;
             --light-bg: #f8f9fa;
             --card-bg: #ffffff;
             --border-color: #dee2e6;
             --text-color: #343a40;
             --text-muted: #6c757d;
             --header-height: 60px;
-            --sidebar-bg: #2c3e50;
-            --sidebar-text: #ecf0f1;
-            --sidebar-hover: #34495e;
-            --sidebar-active: #007bff;
+            --sidebar-bg: #ffffffff;
+            --sidebar-text: #050505ff;
+            --sidebar-hover: #f4f408ff;
+            --sidebar-active: #ffff00ff;
             --sidebar-width: 240px;
         }
 
@@ -85,40 +80,18 @@ $conn->close();
             overflow: hidden;
         }
 
-        /* --- Main Header --- */
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            height: var(--header-height);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-logo strong {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-
-        .header-user span {
-            font-weight: 500;
-        }
-
-        /* --- Base Button Styles --- */
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem;
             border: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
             text-decoration: none;
             display: inline-block;
             text-align: center;
-            color: #fff;
+            color: #000;
         }
 
         .btn-logout {
@@ -140,19 +113,18 @@ $conn->close();
             background-color: var(--success-hover);
         }
 
-        /* --- Admin Dashboard Layout (Grid) --- */
         .admin-container {
             display: grid;
             grid-template-columns: var(--sidebar-width) 1fr;
             height: calc(100vh - var(--header-height));
         }
 
-        /* --- Sidebar --- */
         .admin-sidebar {
             background-color: var(--sidebar-bg);
             padding: 1.5rem 1rem;
             height: 100%;
             overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-nav ul {
@@ -185,7 +157,7 @@ $conn->close();
             background-color: var(--sidebar-hover);
         }
 
-        .sidebar-nav a.active {
+        .sidebar-nav .active {
             background-color: var(--sidebar-active);
             font-weight: 600;
         }
@@ -196,39 +168,64 @@ $conn->close();
             text-align: left;
         }
 
-        /* --- Main Content Area --- */
         .admin-content {
             height: 100%;
-            overflow-y: auto;
-            /* --- NEW: Flexbox to center the card --- */
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 2.5rem;
+            overflow: hidden;
+            padding: 2rem;
+            background-color: #ebecedff;
         }
 
-        /* --- NEW: Modal-Style Card --- */
-        .modal-style-card {
-            background: var(--card-bg);
-            padding: 2rem 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        /* modal same behavior as create employee */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 500px;
-            border: 1px solid var(--border-color);
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
         }
 
-        .modal-style-card h2 {
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-color);
+        }
+
+        .modal-content h3 {
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
         }
 
-        .modal-style-card p {
+        .modal-subtitle {
             color: var(--text-muted);
             margin-bottom: 1.5rem;
+            font-size: 0.95rem;
         }
 
-        /* --- NEW: Modal Form Styles --- */
         .modal-form .form-field {
             margin-bottom: 1rem;
         }
@@ -255,13 +252,18 @@ $conn->close();
             margin-top: 1rem;
         }
 
-        hr {
+        .divider {
             border: 0;
             border-top: 1px solid var(--border-color);
-            margin: 1.5rem 0;
+            margin: 1.2rem 0;
         }
 
-        /* --- Responsive --- */
+        .helper-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
         @media (max-width: 900px) {
             body {
                 overflow: auto;
@@ -284,13 +286,12 @@ $conn->close();
                 gap: 0.5rem;
             }
 
-            .admin-content {
-                height: auto;
-                padding: 1.5rem;
-                align-items: flex-start;
+            .sidebar-nav li {
+                margin-bottom: 0;
             }
 
-            .modal-style-card {
+            .admin-content {
+                height: auto;
                 padding: 1.5rem;
             }
         }
@@ -298,23 +299,17 @@ $conn->close();
 </head>
 
 <body>
-    <header class="main-header">
-        <div class="header-logo">
-            <strong>Tapuyan NHS</strong> Admin Portal
-        </div>
-        <div class="header-user">
-            <span>Welcome, <?php echo htmlspecialchars($admin_display_name); ?>!</span>
-        </div>
-    </header>
+    <?php include_once '../includes/headeradmin.php'; ?>
 
     <div class="admin-container">
-
         <aside class="admin-sidebar">
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="index.php">Dashboard</a></li>
-                    <li id="create-account"><button type="button" onclick="window.location.href='index.php'">Create Employee</button></li>
-                    <li><a href="editadminaccount.php" class="active">Edit My Account</a></li>
+                    <li><button type="button" onclick="window.location.href='index.php'">Create Employee</button></li>
+                    <li>
+                        <button type="button" id="openEditModal">Edit My Account</button>
+                    </li>
                     <li>
                         <form action="../controllers/logout.php" method="post">
                             <button type="submit" class="btn btn-logout">Logout</button>
@@ -324,51 +319,76 @@ $conn->close();
             </nav>
         </aside>
 
-        <main class="admin-content">
-
-            <div class="modal-style-card">
-                <h2>Edit My Admin Account</h2>
-                <p>Here you can change your admin username or password.</p>
-
-                <form id="edit-admin-form" class="modal-form" action="updateadminaccount.php" method="POST" onsubmit="return validatePassword();">
-                    <input type="hidden" name="EmployeeID" value="<?php echo $EmployeeID; ?>">
-
-                    <div class="form-field">
-                        <label for="username">Admin Username:</label>
-                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($current_username); ?>" required>
-                    </div>
-
-                    <hr>
-                    <p style="margin-bottom: 1rem;"><strong>Change Password</strong> (Leave blank to keep current)</p>
-
-                    <div class="form-field">
-                        <label for="new_password">New Password:</label>
-                        <input type="password" id="new_password" name="new_password">
-                    </div>
-                    <div class="form-field">
-                        <label for="confirm_password">Confirm New Password:</label>
-                        <input type="password" id="confirm_password" name="confirm_password">
-                    </div>
-
-                    <button type="submit" name="update" class="btn btn-success">Update Account</button>
-                </form>
-            </div>
-
-        </main>
+        <main class="admin-content"></main>
     </div>
+
+    <div id="edit-account-form" class="modal-backdrop">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Edit My Admin Account</h3>
+            <p class="modal-subtitle">Update your username or password.</p>
+
+            <form id="edit-admin-form" action="updateadminaccount.php" method="POST" class="modal-form"
+                onsubmit="return validatePassword();">
+                <input type="hidden" name="EmployeeID" value="<?php echo $EmployeeID; ?>">
+
+                <div class="form-field">
+                    <label for="username">Admin Username</label>
+                    <input type="text" id="username" name="username"
+                        value="<?php echo htmlspecialchars($current_username); ?>" required>
+                </div>
+
+                <hr class="divider">
+
+                <p class="helper-text"><strong>Change Password</strong> (Leave blank to keep current password)</p>
+
+                <div class="form-field">
+                    <label for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password">
+                </div>
+
+                <div class="form-field">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password">
+                </div>
+
+                <input type="submit" name="update" value="Update Account" class="btn btn-success">
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Simple JavaScript to check if passwords match
+        const modal = document.getElementById('edit-account-form');
+        const btn = document.getElementById('openEditModal');
+        const span = document.querySelector('#edit-account-form .modal-close');
+
+        btn.onclick = function () {
+            modal.style.display = 'flex';
+        }
+
+        span.onclick = function () {
+            modal.style.display = 'none';
+        }
+
+        modal.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         function validatePassword() {
             var new_pass = document.getElementById('new_password').value;
             var confirm_pass = document.getElementById('confirm_password').value;
 
-            // Only validate if new_pass is not empty
             if (new_pass !== "") {
                 if (new_pass !== confirm_pass) {
                     alert("Error: New passwords do not match.");
-                    return false; // Stops the form from submitting
+                    return false;
                 }
             }
-            return true; // Allows the form to submit
+            return true;
         }
     </script>
+</body>
+
+</html>

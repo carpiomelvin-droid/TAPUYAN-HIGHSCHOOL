@@ -2,7 +2,11 @@
 session_start();
 include_once '../db/conn.php';
 
-
+// Redirect if not logged in (Best Practice)
+if (!isset($_SESSION['EmployeeID'])) {
+    header("Location: ../index.php"); // Adjust path to your login page
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -318,7 +322,7 @@ include_once '../db/conn.php';
     </header>
 
     <form action="../controllers/employeedocumentcontroller.php" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="EmployeeID" value="<?php echo $_SESSION['EmployeeID']; ?>">
+        <input type="hidden" name="EmployeeID" value="<?php echo isset($_SESSION['EmployeeID']) ? $_SESSION['EmployeeID'] : ''; ?>">
 
         <main class="content-area">
 
@@ -400,6 +404,12 @@ include_once '../db/conn.php';
                         <input id="pds_file" name="pds_file" type="file" accept=".pdf, image/*" onchange="showFileName(this)">
                         <small class="file-name">No file selected</small>
                         <span class="file-upload-label">PDS</span>
+                    </div>
+
+                    <div class="file-upload-box">
+                        <input id="ICS" name="ICS" type="file" accept=".pdf, image/*" onchange="showFileName(this)">
+                        <small class="file-name">No file selected</small>
+                        <span class="file-upload-label">ICS</span>
                     </div>
 
                 </div>

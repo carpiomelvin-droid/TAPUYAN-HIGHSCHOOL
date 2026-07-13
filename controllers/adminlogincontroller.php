@@ -1,7 +1,7 @@
 <?php
 session_start();
 include_once '../db/conn.php';
-include_once '../includes/header.php';
+
 
 // Login functionality for admin and staff
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

@@ -2,7 +2,7 @@
 
 $server = "localhost";
 $username = "root";
-$password = "";
+$password = "melvz";
 $dbname = "Tapuyan_NHS_IMS";
 
 $conn = mysqli_connect($server, $username, $password, $dbname);

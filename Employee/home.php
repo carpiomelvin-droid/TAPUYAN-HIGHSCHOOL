@@ -52,7 +52,7 @@ $details = [
     'avatar_mime_type' => ''     // <-- ADDED
 ];
 // <-- ADDED: Path to a default placeholder image
-$avatar_src = "../path/to/default/avatar.png"; // Make sure this default path is correct
+$avatar_src = "../src/images/avatar.png"; // Make sure this default path is correct
 
 if ($EmployeeID) {
     // 1. Get Employee Number from 'admin' table
@@ -453,26 +453,25 @@ if ($EmployeeID) {
             </form>
         </nav>
     </header>
-
-    <form id="employee-form" action="../controllers/employeedatacontroller.php" method="POST" enctype="multipart/form-data">
+    <form id="employee-form" action="../controllers/employeedatacontroller.php" method="POST"
+        enctype="multipart/form-data">
         <input type="hidden" name="EmployeeID" value="<?php echo $_SESSION['EmployeeID']; ?>">
 
         <aside class="profile-sidebar">
             <img src="<?php echo $avatar_src; ?>" alt="Profile Avatar" class="avatar-preview">
-
             <label for="avatar" class="avatar-upload-label">Update Profile Avatar</label>
             <input id="avatar" name="avatar" type="file" accept="image/*" onchange="validateAvatar(this)" disabled>
-
-            <h1 class="profile-name" style="text-transform: uppercase;"><?php echo htmlspecialchars($details['name']); ?></h1>
-            <p class="profile-position" style="text-transform: capitalize;"><?php echo htmlspecialchars($details['position']); ?></p>
+            <h1 class="profile-name" style="text-transform: uppercase;">
+                <?php echo htmlspecialchars($details['name']); ?>
+            </h1>
+            <p class="profile-position" style="text-transform: capitalize;">
+                <?php echo htmlspecialchars($details['position']); ?>
+            </p>
             <span class="profile-id">Employee No: <?php echo htmlspecialchars($details['employee_number']); ?></span>
-
-            <input id="employee_number" name="employee_number" type="hidden" value="<?php echo htmlspecialchars($details['employee_number']); ?>">
-
+            <input id="employee_number" name="employee_number" type="hidden"
+                value="<?php echo htmlspecialchars($details['employee_number']); ?>">
         </aside>
-
         <section class="profile-details">
-
             <div class="details-header">
                 <h1 style="text-transform: uppercase;">Welcome, <?php echo htmlspecialchars($display_name); ?>!</h1>
                 <div class="header-buttons">
@@ -480,129 +479,160 @@ if ($EmployeeID) {
                     <button id="btn-save" type="submit" name="save" class="btn btn-success">Save Changes</button>
                 </div>
             </div>
-
             <div class="detail-card">
                 <h2>Personal Information</h2>
                 <div class="card-content">
                     <div class="field">
                         <label for="name">Name *</label>
-                        <input id="name" name="name" type="text" required maxlength="150" placeholder="Surname, Firstname, MI" value="<?php echo htmlspecialchars($details['name']); ?>" readonly>
+                        <input id="name" name="name" type="text" required maxlength="150"
+                            placeholder="Surname, Firstname, MI"
+                            value="<?php echo htmlspecialchars($details['name']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="birthdate">Birthdate</label>
-                        <input id="birthdate" name="birthdate" type="date" value="<?php echo htmlspecialchars($details['birthdate']); ?>" readonly>
+                        <input id="birthdate" name="birthdate" type="date"
+                            value="<?php echo htmlspecialchars($details['birthdate']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="gender">Gender</label>
                         <select id="gender" name="gender" disabled>
                             <option value="">-- Select --</option>
-                            <option value="Male" <?php if ($details['gender'] == 'Male') echo 'selected'; ?>>Male</option>
-                            <option value="Female" <?php if ($details['gender'] == 'Female') echo 'selected'; ?>>Female</option>
-                            <option value="Other" <?php if ($details['gender'] == 'Other') echo 'selected'; ?>>Other</option>
+                            <option value="Male" <?php if ($details['gender'] == 'Male')
+                                echo 'selected'; ?>>Male</option>
+                            <option value="Female" <?php if ($details['gender'] == 'Female')
+                                echo 'selected'; ?>>Female
+                            </option>
+                            <option value="Other" <?php if ($details['gender'] == 'Other')
+                                echo 'selected'; ?>>Other
+                            </option>
                         </select>
                     </div>
                     <div class="field">
                         <label for="marital_status">Marital Status</label>
                         <select id="marital_status" name="marital_status" disabled>
                             <option value="">-- Select --</option>
-                            <option value="Single" <?php if ($details['marital_status'] == 'Single') echo 'selected'; ?>>Single</option>
-                            <option value="Married" <?php if ($details['marital_status'] == 'Married') echo 'selected'; ?>>Married</option>
-                            <option value="Widowed" <?php if ($details['marital_status'] == 'Widowed') echo 'selected'; ?>>Widowed</option>
-                            <option value="Separated" <?php if ($details['marital_status'] == 'Separated') echo 'selected'; ?>>Separated</option>
+                            <option value="Single" <?php if ($details['marital_status'] == 'Single')
+                                echo 'selected'; ?>>
+                                Single</option>
+                            <option value="Married" <?php if ($details['marital_status'] == 'Married')
+                                echo 'selected'; ?>>Married</option>
+                            <option value="Widowed" <?php if ($details['marital_status'] == 'Widowed')
+                                echo 'selected'; ?>>Widowed</option>
+                            <option value="Separated" <?php if ($details['marital_status'] == 'Separated')
+                                echo 'selected'; ?>>Separated</option>
                         </select>
                     </div>
                     <div class="field">
                         <label for="email_address">Email Address</label>
-                        <input id="email_address" name="email_address" type="email" maxlength="150" placeholder="name@example.com" value="<?php echo htmlspecialchars($details['email_address']); ?>" readonly>
+                        <input id="email_address" name="email_address" type="email" maxlength="150"
+                            placeholder="name@example.com"
+                            value="<?php echo htmlspecialchars($details['email_address']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="contact_number">Contact Number</label>
-                        <input id="contact_number" name="contact_number" type="text" maxlength="20" placeholder="09171234567" value="<?php echo htmlspecialchars($details['contact_number']); ?>" readonly>
+                        <input id="contact_number" name="contact_number" type="text" maxlength="20"
+                            placeholder="09171234567"
+                            value="<?php echo htmlspecialchars($details['contact_number']); ?>" readonly>
                     </div>
                     <div class="field full-width">
                         <label for="residential_address">Residential Address</label>
-                        <textarea id="residential_address" name="residential_address" rows="2" placeholder="Street, Barangay, City" readonly><?php echo htmlspecialchars($details['residential_address']); ?></textarea>
+                        <textarea id="residential_address" name="residential_address" rows="2"
+                            placeholder="Street, Barangay, City"
+                            readonly><?php echo htmlspecialchars($details['residential_address']); ?></textarea>
                     </div>
                 </div>
             </div>
-
             <div class="detail-card">
                 <h2>Employment Details</h2>
                 <div class="card-content">
                     <div class="field">
                         <label for="position">Position</label>
-                        <input id="position" name="position" type="text" maxlength="100" placeholder="Teacher I" value="<?php echo htmlspecialchars($details['position']); ?>" readonly>
+                        <input id="position" name="position" type="text" maxlength="100" placeholder="Teacher I"
+                            value="<?php echo htmlspecialchars($details['position']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="subject_handled">Subject Handled</label>
-                        <input id="subject_handled" name="subject_handled" type="text" maxlength="150" placeholder="Mathematics" value="<?php echo htmlspecialchars($details['subject_handled']); ?>" readonly>
+                        <input id="subject_handled" name="subject_handled" type="text" maxlength="150"
+                            placeholder="Mathematics"
+                            value="<?php echo htmlspecialchars($details['subject_handled']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="basic_salary">Basic Salary</label>
-                        <input id="basic_salary" name="basic_salary" type="number" step="0.01" min="0" placeholder="25000.00" value="<?php echo htmlspecialchars($details['basic_salary']); ?>" readonly>
+                        <input id="basic_salary" name="basic_salary" type="number" step="0.01" min="0"
+                            placeholder="25000.00" value="<?php echo htmlspecialchars($details['basic_salary']); ?>"
+                            readonly>
                     </div>
                     <div class="field">
                         <label for="salary_grade">Salary Grade</label>
-                        <input id="salary_grade" name="salary_grade" type="text" maxlength="10" placeholder="11" value="<?php echo htmlspecialchars($details['salary_grade']); ?>" readonly>
+                        <input id="salary_grade" name="salary_grade" type="text" maxlength="10" placeholder="11"
+                            value="<?php echo htmlspecialchars($details['salary_grade']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="step">Step</label>
-                        <input id="step" name="step" type="text" maxlength="10" placeholder="1" value="<?php echo htmlspecialchars($details['step']); ?>" readonly>
+                        <input id="step" name="step" type="text" maxlength="10" placeholder="1"
+                            value="<?php echo htmlspecialchars($details['step']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="plantilla_number">Plantilla Number</label>
-                        <input id="plantilla_number" name="plantilla_number" type="text" maxlength="100" value="<?php echo htmlspecialchars($details['plantilla_number']); ?>" readonly>
+                        <input id="plantilla_number" name="plantilla_number" type="text" maxlength="100"
+                            value="<?php echo htmlspecialchars($details['plantilla_number']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="original_appointment_date">Original Date of Appointment</label>
-                        <input id="original_appointment_date" name="original_appointment_date" type="date" value="<?php echo htmlspecialchars($details['original_appointment_date']); ?>" readonly>
+                        <input id="original_appointment_date" name="original_appointment_date" type="date"
+                            value="<?php echo htmlspecialchars($details['original_appointment_date']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="latest_appointment_date">Latest Appointment Date</label>
-                        <input id="latest_appointment_date" name="latest_appointment_date" type="date" value="<?php echo htmlspecialchars($details['latest_appointment_date']); ?>" readonly>
+                        <input id="latest_appointment_date" name="latest_appointment_date" type="date"
+                            value="<?php echo htmlspecialchars($details['latest_appointment_date']); ?>" readonly>
                     </div>
                     <div class="field full-width">
                         <label for="previous_employer">Previous Employer</label>
-                        <input id="previous_employer" name="previous_employer" type="text" maxlength="150" value="<?php echo htmlspecialchars($details['previous_employer']); ?>" readonly>
+                        <input id="previous_employer" name="previous_employer" type="text" maxlength="150"
+                            value="<?php echo htmlspecialchars($details['previous_employer']); ?>" readonly>
                     </div>
                 </div>
             </div>
-
             <div class="detail-card">
                 <h2>IDs & Licenses</h2>
                 <div class="card-content">
                     <div class="field">
                         <label for="gsis_number">GSIS Number</label>
-                        <input id="gsis_number" name="gsis_number" type="text" maxlength="50" value="<?php echo htmlspecialchars($details['gsis_number']); ?>" readonly>
+                        <input id="gsis_number" name="gsis_number" type="text" maxlength="50"
+                            value="<?php echo htmlspecialchars($details['gsis_number']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="philhealth_number">PhilHealth Number</label>
-                        <input id="philhealth_number" name="philhealth_number" type="text" maxlength="50" value="<?php echo htmlspecialchars($details['philhealth_number']); ?>" readonly>
+                        <input id="philhealth_number" name="philhealth_number" type="text" maxlength="50"
+                            value="<?php echo htmlspecialchars($details['philhealth_number']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="pagibig_number">Pag-IBIG Number</label>
-                        <input id="pagibig_number" name="pagibig_number" type="text" maxlength="50" value="<?php echo htmlspecialchars($details['pagibig_number']); ?>" readonly>
+                        <input id="pagibig_number" name="pagibig_number" type="text" maxlength="50"
+                            value="<?php echo htmlspecialchars($details['pagibig_number']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="tin_number">TIN Number</label>
-                        <input id="tin_number" name="tin_number" type="text" maxlength="50" value="<?php echo htmlspecialchars($details['tin_number']); ?>" readonly>
+                        <input id="tin_number" name="tin_number" type="text" maxlength="50"
+                            value="<?php echo htmlspecialchars($details['tin_number']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="prc_license">PRC License</label>
-                        <input id="prc_license" name="prc_license" type="text" maxlength="100" placeholder="1234567" value="<?php echo htmlspecialchars($details['prc_license']); ?>" readonly>
+                        <input id="prc_license" name="prc_license" type="text" maxlength="100" placeholder="1234567"
+                            value="<?php echo htmlspecialchars($details['prc_license']); ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="expiration_date">Expiration Date (PRC)</label>
-                        <input id="expiration_date" name="expiration_date" type="date" value="<?php echo htmlspecialchars($details['expiration_date']); ?>" readonly>
+                        <input id="expiration_date" name="expiration_date" type="date"
+                            value="<?php echo htmlspecialchars($details['expiration_date']); ?>" readonly>
                     </div>
                 </div>
             </div>
-
         </section>
     </form>
-
     <script>
-        document.getElementById('btn-edit').addEventListener('click', function() {
+        document.getElementById('btn-edit').addEventListener('click', function () {
             const form = document.getElementById('employee-form');
 
             // 1. Get all 'readonly' fields and make them editable
@@ -612,7 +642,6 @@ if ($EmployeeID) {
                     field.readOnly = false;
                 }
             });
-
             // 2. Get all 'disabled' fields and enable them
             const disabledFields = form.querySelectorAll('select[disabled], input[type="file"][disabled]');
             disabledFields.forEach(field => {
@@ -642,6 +671,7 @@ if ($EmployeeID) {
             }
         }
     </script>
+
 </body>
 
 </html>

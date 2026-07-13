@@ -46,7 +46,8 @@ $sql_docs = "SELECT
                 LENGTH(service_record_file) as service_record_file,
                 LENGTH(appointment_file) as appointment_file,
                 LENGTH(trainings_awards_file) as trainings_awards_file,
-                LENGTH(pds_file) as pds_file
+                LENGTH(pds_file) as pds_file,
+                LENGTH(ICS) as ICS
              FROM employee_documents WHERE EmployeeID = ?";
 
 $stmt_docs = $conn->prepare($sql_docs);
@@ -69,7 +70,8 @@ $doc_map = [
     'service_record_file' => 'Service Record',
     'appointment_file' => 'Appointment',
     'trainings_awards_file' => 'Trainings and Awards',
-    'pds_file' => 'PDS (Personal Data Sheet)'
+    'pds_file' => 'PDS (Personal Data Sheet)',
+    'ICS' => 'ICS(ICS)'
 ];
 
 // --- 4. Create the Avatar Source ---

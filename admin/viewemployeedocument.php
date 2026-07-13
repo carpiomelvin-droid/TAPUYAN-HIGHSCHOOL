@@ -23,7 +23,8 @@ $allowed_documents = [
     'service_record_file',
     'appointment_file',
     'trainings_awards_file',
-    'pds_file'
+    'pds_file',
+    'ICS'
 ];
 
 if ($EmployeeID == 0 || !in_array($doc_column, $allowed_documents)) {

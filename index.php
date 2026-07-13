@@ -1,8 +1,6 @@
 <?php
 include_once './db/conn.php';
 
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,14 +19,14 @@ include_once './db/conn.php';
     <title>Login | Tapuyan NHS EMS</title>
     <style>
         :root {
-            --primary-color: #007bff;
-            --primary-hover: #0056b3;
+            --primary-color: #ffff00ff;
+            --primary-hover: #f4f408ff;
             --light-bg: #f8f9fa;
             --card-bg: #ffffff;
             --border-color: #dee2e6;
             --text-color: #343a40;
             --text-muted: #6c757d;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow: 0 4px 20px rgba(255, 234, 0, 0.1);
             --border-radius: 8px;
         }
 
@@ -112,11 +110,11 @@ include_once './db/conn.php';
 
         .form-login button {
             background-color: var(--primary-color);
-            color: white;
+            text-transform: uppercase;
             padding: 0.9rem;
             border: none;
             border-radius: 5px;
-            font-size: 1rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             margin-top: 0.5rem;
@@ -154,13 +152,43 @@ include_once './db/conn.php';
             color: var(--text-muted);
             margin-top: 5px;
         }
+
+        .login {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: larger;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 480px) {
+            .bg-image {
+                object-fit: cover;
+            }
+
+        }
     </style>
 </head>
 
 <body>
+    <!-- <div>
+        <img src="./src/images/bg.jpg" alt="" class="bg-image">
+    </div> -->
     <div class="container-login">
-        <h2>Please Log in</h2>
-        <p class="login-subttitle">Tapuyan NHS Employee Portal</p>
+        <img src="./src/images/logo.png" alt="" width="150px" height="auto">
+        <p class="login">Please Log in</p>
+        <span class="login-subttitle ">Tapuyan NHS Employee Portal</span>
         <div class="login-subtext">
             <form action="./controllers/adminlogincontroller.php" method="post" class="form-login">
                 <input type="text" name="username" placeholder="Enter username" required>

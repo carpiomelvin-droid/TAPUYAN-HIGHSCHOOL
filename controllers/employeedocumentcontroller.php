@@ -55,15 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'service_record_file' => getFileContent('service_record_file'),
         'appointment_file' => getFileContent('appointment_file'),
         'trainings_awards_file' => getFileContent('trainings_awards_file'),
-        'pds_file' => getFileContent('pds_file')
+        'pds_file' => getFileContent('pds_file'),
+        'ICS' => getFileContent('ICS')
     ];
 
-    // 5️⃣ Prepare SQL with ON DUPLICATE KEY UPDATE (Corrected for 13 columns)
+    // 5️⃣ Prepare SQL with ON DUPLICATE KEY UPDATE (Corrected for 15 columns)
     $sql = "INSERT INTO employee_documents (
         EmployeeID,
         prc_file, dll_file, saln_file, ipcr_file, diploma_file, tor_file, itr_file,
-        itr_file_2, service_record_file, appointment_file, trainings_awards_file, pds_file
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) -- 13 total placeholders
+        itr_file_2, service_record_file, appointment_file, trainings_awards_file,  pds_file, ICS
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?) -- 14 total placeholders
     ON DUPLICATE KEY UPDATE
         prc_file = IF(VALUES(prc_file) IS NOT NULL, VALUES(prc_file), prc_file),
         dll_file = IF(VALUES(dll_file) IS NOT NULL, VALUES(dll_file), dll_file),
@@ -76,17 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         service_record_file = IF(VALUES(service_record_file) IS NOT NULL, VALUES(service_record_file), service_record_file),
         appointment_file = IF(VALUES(appointment_file) IS NOT NULL, VALUES(appointment_file), appointment_file),
         trainings_awards_file = IF(VALUES(trainings_awards_file) IS NOT NULL, VALUES(trainings_awards_file), trainings_awards_file),
-        pds_file = IF(VALUES(pds_file) IS NOT NULL, VALUES(pds_file), pds_file)";
+        pds_file = IF(VALUES(pds_file) IS NOT NULL, VALUES(pds_file), pds_file),
+        ICS = IF(VALUES(ICS) IS NOT NULL, VALUES(ICS), ICS)";
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("Prepare failed: " . $conn->error);
     }
 
-    // 6️⃣ Bind parameters (Corrected for 13 columns)
+    // 6️⃣ Bind parameters (Corrected for 14 columns)
     $null = null; // Placeholder for blob data
     $stmt->bind_param(
-        "ibbbbbbbbbbbb",  // 1 integer (i) + 12 blobs (b)
+        "ibbbbbbbbbbbbb",  // 1 integer (i) + 13 blobs (b)
         $EmployeeID,
         $null, // prc_file
         $null, // dll_file
@@ -99,7 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $null, // service_record_file
         $null, // appointment_file
         $null, // trainings_awards_file
-        $null  // pds_file
+        $null,  // pds_file
+        $null, // ICS
     );
 
     // 7️⃣ Stream binary data using send_long_data() (Corrected index)
