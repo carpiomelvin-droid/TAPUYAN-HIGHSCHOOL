@@ -3,17 +3,35 @@ session_start();
 include_once '../db/conn.php';
 include_once '../includes/deletefunction.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
-    die("Access Denied. You do not have permission to perform this action.");
-}
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['EmployeeID'])) {
     die("Invalid Request.");
 }
 
-$EmployeeID = $_POST['EmployeeID'];
+$adminId = (int) ($_SESSION['EmployeeID'] ?? 0);
+$targetEmployeeId = (int) $_POST['EmployeeID'];
 
-$isDeleted = deleteEmployee($conn, $EmployeeID);
+if ($adminId <= 0 || $targetEmployeeId <= 0) {
+    die("Invalid Request.");
+}
+
+$roleStmt = $conn->prepare("SELECT role FROM admin WHERE EmployeeID = ? LIMIT 1");
+if (!$roleStmt) {
+    die("Unable to verify permissions.");
+}
+$roleStmt->bind_param("i", $adminId);
+$roleStmt->execute();
+$roleRow = $roleStmt->get_result()->fetch_assoc();
+$roleStmt->close();
+
+if (!$roleRow || $roleRow['role'] !== 'superadmin') {
+    die("Access Denied. You do not have permission to perform this action.");
+}
+
+if ($targetEmployeeId === $adminId) {
+    die("Invalid Request.");
+}
+
+$isDeleted = deleteEmployee($conn, $targetEmployeeId);
 
 if ($isDeleted) {
     $status = "success";

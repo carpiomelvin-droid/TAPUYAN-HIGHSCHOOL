@@ -1,0 +1,1085 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>View Employee: MALIMATA, MARK JOSEPH M.</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --info: #0ea5e9;
+            --info-hover: #0284c7;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
+
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* --- Base Button Styles --- */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-view {
+            background-color: var(--accent-blue);
+        }
+
+        .btn-view:hover {
+            background-color: var(--accent-blue-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: var(--primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-main);
+            color: var(--primary-light);
+        }
+
+        .btn-reset {
+            background-color: #b45309;
+        }
+
+        .btn-reset:hover {
+            background-color: #92400e;
+        }
+
+        .reset-alert {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .85rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
+        .reset-alert-success {
+            color: #166534;
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .reset-alert-error {
+            color: #991b1b;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .reset-modal-content form {
+            display: grid;
+            gap: .55rem;
+        }
+
+        .reset-modal-content label {
+            color: var(--text-muted);
+            font-size: .78rem;
+            font-weight: 700;
+            margin-top: .35rem;
+        }
+
+        .reset-modal-content input {
+            width: 100%;
+            padding: .7rem .8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-main);
+            font: inherit;
+        }
+
+        .reset-modal-content input:focus {
+            outline: 2px solid rgba(37, 99, 235, .2);
+            border-color: var(--accent-blue);
+        }
+
+        .reset-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: .65rem;
+            margin-top: 1rem;
+        }
+
+        /* --- Main Layout --- */
+        .admin-content {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .content-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--primary);
+        }
+
+        .content-header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* --- Profile Structural Grid --- */
+        .profile-view-container {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .profile-view-sidebar {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 2.5rem 1.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .avatar-preview {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .profile-view-sidebar:hover .avatar-preview {
+            transform: scale(1.03);
+        }
+
+        .profile-name-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+        }
+
+        .profile-position {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            font-weight: 700;
+            background-color: #eff6ff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-key-info {
+            text-align: left;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        .profile-key-info div {
+            margin-bottom: 1rem;
+            background: var(--bg-input);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-key-info label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .profile-key-info span {
+            color: var(--text-main);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .profile-view-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .detail-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .detail-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .detail-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.25rem 1.75rem;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .detail-card h2 i {
+            color: var(--accent-blue);
+        }
+
+        /* --- Read-only Data Grid --- */
+        .detail-grid {
+            padding: 1.75rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .detail-item {
+            background: var(--bg-input);
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            text-transform: uppercase;
+        }
+
+        .detail-item:hover {
+            background: #ffffff;
+            border-color: var(--accent-blue);
+        }
+
+        .detail-item label {
+            font-size: 0.725rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .detail-item span {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* --- Document Management Table --- */
+        .table-responsive {
+            overflow-x: auto;
+            padding: 0.5rem;
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .employee-table th {
+            background: var(--bg-input);
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .employee-table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .employee-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .employee-table tbody tr:hover td {
+            background: var(--bg-input);
+        }
+
+        /* --- Status Badges --- */
+        .status-badge {
+            padding: 0.3rem 0.75rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-uploaded {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-missing {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-buttons .btn {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* --- Print Architecture --- */
+        .print-header {
+            display: none;
+        }
+
+        /* --- Modal Styling for Multi-File Archive --- */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        .custom-modal-content {
+            background-color: var(--bg-card);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .custom-modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .custom-modal-close:hover {
+            color: var(--danger);
+        }
+
+        .archive-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-input);
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- Responsive Viewports --- */
+        @media (max-width: 1024px) {
+            .profile-view-container {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-view-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .content-header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+
+        /* --- Print Enhancements --- */
+        @media print {
+
+            .main-header,
+            .admin-sidebar,
+            .content-header,
+            .profile-view-sidebar,
+            .action-buttons,
+            .custom-modal,
+            th:last-child,
+            td:last-child {
+                display: none !important;
+            }
+
+            .print-header {
+                display: block;
+                text-align: center;
+                margin-bottom: 2rem;
+                border-bottom: 2px solid #000;
+                padding-bottom: 1rem;
+            }
+
+            body {
+                background-color: #fff !important;
+                font-family: 'Times New Roman', serif;
+            }
+
+            .profile-view-container {
+                display: block !important;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+                padding: 1rem !important;
+            }
+
+            .detail-card {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+                page-break-inside: avoid;
+                margin-bottom: 1.5rem;
+            }
+
+            .detail-card h2 {
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    :root {
+        --border-color: #dee2e6;
+        --text-color: #343a40;
+        --text-muted: #6c757d;
+    }
+
+    /* HEADER */
+    .main-header {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 1.5rem;
+        height: 70px;
+        background: linear-gradient(135deg, #78a0e6ff, #edeb74ff);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    /* LEFT */
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .logo {
+        width: 60px;
+        height: auto;
+    }
+
+    .header-logo {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .header-logo strong {
+        font-size: 1.1rem;
+    }
+
+    .header-logo span {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* NAV */
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .header-nav a,
+    .header-nav button,
+    .header-welcome {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.55rem 0.9rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        color: var(--text-color);
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .header-nav a:hover,
+    .header-nav button:hover {
+        background: #faf60cff;
+    }
+
+    /* WELCOME */
+    .header-welcome {
+        cursor: default;
+        background: rgba(255, 255, 255, 0.35);
+        font-weight: 600;
+    }
+
+    /* HAMBURGER */
+    .menu-toggle,
+    .mobile-message-link {
+        display: none;
+    }
+
+    .menu-toggle {
+        font-size: 1.3rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* MOBILE */
+    @media (max-width:768px) {
+        .menu-toggle {
+            display: block;
+        }
+
+        .header-nav .mobile-message-link {
+            display: flex;
+        }
+
+        .header-nav {
+            position: absolute;
+            top: 70px;
+            right: 1rem;
+            width: 250px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: 0.2s;
+            z-index: 999;
+        }
+
+        .header-nav.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .header-nav a,
+        .header-nav button,
+        .header-welcome {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width:425px) {
+        .main-header {
+            padding: 0 1rem;
+            height: 72px;
+        }
+
+        .logo {
+            width: 56px;
+        }
+
+        .header-logo strong {
+            font-size: 1rem;
+        }
+
+        .header-logo span {
+            font-size: 0.7rem;
+        }
+
+        .header-nav {
+            top: 72px;
+            right: 12px;
+            width: 220px;
+        }
+
+        .header-nav a,
+        .header-nav button,
+        .header-welcome {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+        }
+    }
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tapuyan NHS - Employee Portal</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<header class="main-header">
+    <div class="header-left">
+        <img src="../src/images/logo.png" alt="Logo" class="logo">
+        <div class="header-logo">
+            <strong>Tapuyan National High School</strong>
+            <span>Admin Dashboard</span>
+        </div>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle admin sidebar"
+        aria-controls="adminSidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</header>
+
+<script>
+    const toggleBtn = document.getElementById('menuToggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const sidebar = document.getElementById('adminSidebar');
+            if (!sidebar) return;
+            const isOpen = sidebar.classList.toggle('show');
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }
+</script>
+    <div class="admin-container">
+        <main class="admin-content">
+
+            <div class="content-header">
+                <h1 style="text-transform: uppercase;">
+                    MALIMATA, MARK JOSEPH M.                </h1>
+                <div class="content-header-actions">
+                    <a href="admin_download_pdf.php?id=88" class="btn btn-success">
+                        <i class="fa-solid fa-file-pdf"></i> Download PDF
+                    </a>
+
+                    
+                    <a href="index.php" class="btn btn-secondary">&laquo; Back to Dashboard</a>
+                </div>
+            </div>
+
+            <div class="profile-view-container">
+
+                <aside class="profile-view-sidebar">
+                    <img src="../src/images/avatar.png" alt="Profile Avatar" class="avatar-preview">
+                    <div class="profile-name-title"><!-- MALIMATA, MARK JOSEPH M. --></div>
+
+                    <p class="profile-position">
+                        Teacher v                    </p>
+
+                    <hr style="border:0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                    <div class="profile-key-info">
+                        <div>
+                            <label>Employee Number</label>
+                            <span>85466845</span>
+                        </div>
+                        <div>
+                            <label>Username</label>
+                            <span>test</span>
+                        </div>
+                        <div>
+                            <label>Email Address</label>
+                            <span></span>
+                        </div>
+                        <div>
+                            <label>Contact Number</label>
+                            <span></span>
+                        </div>
+                    </div>
+                </aside>
+
+                                    <div
+                        class="reset-alert reset-alert-success">
+                        <i
+                            class="fa-solid fa-circle-check"></i>
+                        <span>Employee username and password were reset successfully.</span>
+                    </div>
+                
+                <section class="profile-view-details">
+
+                    <div class="detail-card">
+                        <h2><i class="fa-solid fa-user"></i> Personal Information</h2>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Full Name</label>
+                                <span>MALIMATA, MARK JOSEPH M.</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Birthdate</label>
+                                <span>1995-08-17</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Gender</label>
+                                <span>Male</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Marital Status</label>
+                                <span>Single</span>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>Residential Address</label>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h2><i class="fa-solid fa-briefcase"></i> Employment Details</h2>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Position</label>
+                                <span>Teacher v</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Subject Handled</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Educational Attainment</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Eligibility</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Basic Salary</label>
+                                <span>
+                                                                    </span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Salary Grade</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Step</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Plantilla Number</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Original Appointment Date</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Latest Appointment Date</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>Previous Employer</label>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h2><i class="fa-solid fa-id-card"></i> IDs & Licenses</h2>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>GSIS Number</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>PhilHealth Number</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Pag-IBIG Number</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>TIN Number</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>PRC License</label>
+                                <span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>PRC Expiration Date</label>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h2><i class="fa-solid fa-folder-open"></i> Uploaded Documents</h2>
+                        <div class="table-responsive">
+                            <table class="employee-table">
+                                <thead>
+                                    <tr>
+                                        <th>Document Name</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No document record found for this employee.</td></tr>                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Multi-File Archive Modal -->
+    <div id="archiveModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <button type="button" class="custom-modal-close" onclick="closeArchiveModal()">&times;</button>
+            <h2 id="modalTitle" style="color: var(--primary); font-size: 1.2rem; margin-bottom: 0.25rem;">Uploaded Files
+                Archive</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">View or download files submitted under this
+                requirement category.</p>
+            <div id="archiveListContainer" class="archive-list"></div>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="button" class="btn btn-secondary" onclick="closeArchiveModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="print-header">
+        <h1>Employee Information Sheet</h1>
+        <p>MALIMATA, MARK JOSEPH M.</p>
+        <span>Teacher v</span>
+    </div>
+
+    <script>
+        const uploadedFiles = {};
+        const legacyFiles = {};
+        const employeeId = 88;
+        const modal = document.getElementById('archiveModal');
+
+        function openArchiveModal(column, label) {
+            modal.style.display = 'block';
+            document.getElementById('modalTitle').textContent = label + ' - Uploaded Files';
+            const container = document.getElementById('archiveListContainer');
+            container.innerHTML = '';
+
+            const files = uploadedFiles[column] || [];
+            const hasLegacy = legacyFiles[column] && legacyFiles[column] > 0;
+
+            if (files.length === 0 && !hasLegacy) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:1rem;">No files found.</p>';
+                return;
+            }
+
+            files.forEach(f => {
+                const dateStr = f.uploaded_at ? new Date(f.uploaded_at).toLocaleDateString() : 'Recent upload';
+                const div = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `
+                    <div style="min-width:0; margin-right: 1rem;">
+                        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${f.file_name}"><i class="fa-solid fa-file-lines" style="color:var(--accent-blue); margin-right:6px;"></i> ${f.file_name}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Uploaded on ${dateStr}</div>
+                    </div>
+                    <div class="action-buttons" style="flex-shrink:0;">
+                        <a href="downloademployeedocument.php?file_id=${f.file_id}&action=view" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>
+                        <a href="downloademployeedocument.php?file_id=${f.file_id}&action=download" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (hasLegacy && files.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `
+                    <div style="min-width:0; margin-right: 1rem;">
+                        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main);"><i class="fa-solid fa-file-circle-check" style="color:var(--success); margin-right:6px;"></i> Archived Document</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Legacy system upload</div>
+                    </div>
+                    <div class="action-buttons" style="flex-shrink:0;">
+                        <a href="viewemployeedocument.php?id=${employeeId}&doc=${column}" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>
+                        <a href="downloademployeedocument.php.php?id=${employeeId}&doc=${column}" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function closeArchiveModal() {
+            modal.style.display = 'none';
+        }
+
+        const resetCredentialsModal = document.getElementById('resetCredentialsModal');
+
+        function openResetModal() {
+            if (!resetCredentialsModal) return;
+            resetCredentialsModal.style.display = 'block';
+        }
+
+        function closeResetModal() {
+            if (resetCredentialsModal) resetCredentialsModal.style.display = 'none';
+        }
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-view-archive');
+            if (btn) {
+                openArchiveModal(btn.getAttribute('data-col'), btn.getAttribute('data-label'));
+                return;
+            }
+            if (e.target === modal) closeArchiveModal();
+            if (e.target === resetCredentialsModal) closeResetModal();
+        });
+    </script>
+</body>
+
+</html>

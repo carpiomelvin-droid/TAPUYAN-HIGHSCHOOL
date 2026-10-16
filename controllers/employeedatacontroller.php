@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     $expiration_date = post_or_null('expiration_date');
     $previous_employer = post_or_null('previous_employer');
     $plantilla_number = post_or_null('plantilla_number');
+    $educational_attainment = post_or_null('educational_attainment');
+    $eligibility = post_or_null('eligibility');
 
     // 2b. Handle FILE data (Avatar)
     $avatar_img_data = null;
@@ -68,18 +70,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     // If no file was uploaded, $avatar_img_data and $avatar_mime_type remain null
 
 
-    // 3. Prepare SQL with ON DUPLICATE KEY UPDATE (Now 26 columns)
+    // 3. Prepare SQL with ON DUPLICATE KEY UPDATE (Now 28 columns total)
     $sql = "INSERT INTO employee_details (
-        EmployeeID, employee_number, name, position, basic_salary, 
-        original_appointment_date, latest_appointment_date, salary_grade, step, gender, 
-        subject_handled, marital_status, birthdate, residential_address, email_address, 
-        contact_number, gsis_number, philhealth_number, pagibig_number, tin_number, 
+        EmployeeID, employee_number, name, position, basic_salary,
+        original_appointment_date, latest_appointment_date, salary_grade, step, gender,
+        subject_handled, marital_status, birthdate, residential_address, email_address,
+        contact_number, gsis_number, philhealth_number, pagibig_number, tin_number,
         prc_license, expiration_date, previous_employer, plantilla_number,
-        avatar_image, avatar_mime_type
+        educational_attainment, eligibility, avatar_image, avatar_mime_type
     ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?  -- 26 placeholders
+        ?, ?, ?, ?, ?, ?, ?, ?  -- 28 placeholders
     )
     ON DUPLICATE KEY UPDATE
         employee_number = VALUES(employee_number),
@@ -105,7 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         expiration_date = VALUES(expiration_date),
         previous_employer = VALUES(previous_employer),
         plantilla_number = VALUES(plantilla_number),
-        
+        educational_attainment = VALUES(educational_attainment),
+        eligibility = VALUES(eligibility),
+
         -- This logic updates the avatar ONLY IF a new one is not NULL.
         avatar_image = IF(VALUES(avatar_image) IS NOT NULL, VALUES(avatar_image), avatar_image),
         avatar_mime_type = IF(VALUES(avatar_mime_type) IS NOT NULL, VALUES(avatar_mime_type), avatar_mime_type)";
@@ -118,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     // 4. Bind parameters (i = integer, d = double, s = string, b = blob)
     $null_blob = null; // Placeholder for the blob
     $stmt->bind_param(
-        "isssdsssssssssssssssssssbs", // 24 types + 'b' (blob) + 's' (string)
+        "isssdsssssssssssssssssssssbs", // 26 strings/numbers + 'b' (blob) + 's' (string)
         $EmployeeID,
         $employee_number,
         $name,
@@ -143,6 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
         $expiration_date,
         $previous_employer,
         $plantilla_number,
+        $educational_attainment,
+        $eligibility,
         $null_blob,        // Placeholder for avatar_image
         $avatar_mime_type  // The mime type (or null)
     );
@@ -150,21 +156,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     // 5. Stream BLOB data (if it exists)
     //    This must be done AFTER bind_param and BEFORE execute
     if ($avatar_img_data !== null) {
-        // 24 is the 0-based index of the avatar_image placeholder
-        $stmt->send_long_data(24, $avatar_img_data);
+        // 26 is now the 0-based index of the avatar_image placeholder
+        $stmt->send_long_data(26, $avatar_img_data);
     }
 
     // 6. Execute and respond
     if ($stmt->execute()) {
-        echo "<script>
-            alert('Employee data saved successfully!');
-            window.location.href = '../Employee/home.php';
-        </script>";
+        header("Location: ../Employee/home.php?status=success&message=" . urlencode("Employee data saved successfully!"));
+        exit();
     } else {
-        echo "<script>
-            alert('Error saving data: " . addslashes($stmt->error) . "');
-            window.history.back();
-        </script>";
+        header("Location: ../Employee/home.php?status=error&message=" . urlencode("Error saving data: " . $stmt->error));
+        exit();
     }
 
     $stmt->close();

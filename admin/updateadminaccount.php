@@ -13,9 +13,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'superadmin') {
 }
 
 // --- 2. Get Data ---
-$EmployeeID = $_POST['EmployeeID'];
-$username = $_POST['username'];
-$new_password = $_POST['new_password'];
+$EmployeeID = (int) ($_POST['EmployeeID'] ?? 0);
+$username = trim((string) ($_POST['username'] ?? ''));
+$full_name = trim((string) ($_POST['full_name'] ?? ''));
+$new_password = $_POST['new_password'] ?? '';
 $confirm_password = $_POST['confirm_password']; // Already checked by JS, but we double-check
 
 // --- 3. Final Security Check ---
@@ -25,13 +26,32 @@ if ($EmployeeID != $_SESSION['EmployeeID']) {
     die("Security check failed. You can only edit your own account.");
 }
 
-// --- 4. Initialize Query Parts ---
-// We will build the query dynamically based on what the user wants to update.
-$sql_parts = ["username = ?"]; // Username always updates
-$params = [$username];
-$types = "s"; // 's' for string (username)
+// --- 4. Validate profile fields and optional avatar ---
+if ($username === '' || mb_strlen($username) > 255 || $full_name === '' || mb_strlen($full_name) > 150) {
+    die("Username and full name are required.");
+}
 
-// --- 5. Handle Password Change (if provided) ---
+$avatarData = null;
+$avatarMime = null;
+if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $avatarUpload = $_FILES['avatar'];
+    if ($avatarUpload['error'] !== UPLOAD_ERR_OK || $avatarUpload['size'] > 5 * 1024 * 1024) {
+        die("The avatar must be smaller than 5 MB.");
+    }
+    $avatarFinfo = new finfo(FILEINFO_MIME_TYPE);
+    $avatarMime = $avatarFinfo->file($avatarUpload['tmp_name']);
+    if (!in_array($avatarMime, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
+        die("Avatar must be a JPG, PNG, GIF, or WEBP image.");
+    }
+    $avatarData = file_get_contents($avatarUpload['tmp_name']);
+}
+
+// --- 5. Update account credentials ---
+$sql_parts = ["username = ?"];
+$params = [$username];
+$types = "s";
+
+// --- 6. Handle Password Change (if provided) ---
 if (!empty($new_password)) {
     // Server-side check that passwords match
     if ($new_password !== $confirm_password) {
@@ -48,7 +68,7 @@ if (!empty($new_password)) {
     $types .= "s"; // 's' for string (password)
 }
 
-// --- 6. Build and Execute the Final Query ---
+// --- 7. Build and Execute the account query ---
 $sql = "UPDATE admin SET " . implode(", ", $sql_parts) . " WHERE EmployeeID = ?";
 
 // Add the EmployeeID to the end of our parameters
@@ -60,8 +80,55 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 
 if ($stmt->execute()) {
-    // IMPORTANT: Update session username in case it changed
-    $_SESSION['name'] = $username;
+    $profileCheck = $conn->prepare(
+        "SELECT id FROM employee_details WHERE EmployeeID = ? ORDER BY id ASC LIMIT 1"
+    );
+    if (!$profileCheck) {
+        die("Unable to read the administrator profile.");
+    }
+    $profileCheck->bind_param('i', $EmployeeID);
+    $profileCheck->execute();
+    $profileResult = $profileCheck->get_result();
+    $existingProfile = $profileResult ? $profileResult->fetch_assoc() : null;
+    $profileCheck->close();
+
+    if ($existingProfile) {
+        if ($avatarData !== null) {
+            $profileStmt = $conn->prepare(
+                "UPDATE employee_details
+                 SET name = ?, avatar_image = ?, avatar_mime_type = ?
+                 WHERE id = ?"
+            );
+            $profileNull = null;
+            $profileStmt->bind_param('sbsi', $full_name, $profileNull, $avatarMime, $existingProfile['id']);
+            $profileStmt->send_long_data(1, $avatarData);
+        } else {
+            $profileStmt = $conn->prepare(
+                "UPDATE employee_details SET name = ? WHERE id = ?"
+            );
+            $profileStmt->bind_param('si', $full_name, $existingProfile['id']);
+        }
+    } else {
+        $profileStmt = $conn->prepare(
+            "INSERT INTO employee_details (EmployeeID, name, avatar_image, avatar_mime_type)
+             VALUES (?, ?, ?, ?)"
+        );
+        $profileNull = null;
+        $profileStmt->bind_param('isss', $EmployeeID, $full_name, $profileNull, $avatarMime);
+        if ($avatarData !== null) {
+            $profileStmt->send_long_data(2, $avatarData);
+        }
+    }
+    if (!$profileStmt || !$profileStmt->execute()) {
+        if ($profileStmt) {
+            $profileStmt->close();
+        }
+        die("Unable to save the administrator profile.");
+    }
+    $profileStmt->close();
+
+    $_SESSION['username'] = $username;
+    $_SESSION['name'] = $full_name;
 
     echo "<script>
             alert('Account updated successfully!');

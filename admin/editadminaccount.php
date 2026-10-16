@@ -24,8 +24,11 @@ if ($stmt_name) {
     $stmt_name->close();
 }
 
-// 4. Fetch current username from DB to pre-fill the form
-$sql_user = "SELECT username FROM admin WHERE EmployeeID = ?";
+// 4. Fetch current account profile and username to pre-fill the form
+$sql_user = "SELECT a.username, d.name, d.avatar_image, d.avatar_mime_type
+    FROM admin a
+    LEFT JOIN employee_details d ON d.EmployeeID = a.EmployeeID
+    WHERE a.EmployeeID = ? LIMIT 1";
 $stmt_user = $conn->prepare($sql_user);
 $stmt_user->bind_param("i", $EmployeeID);
 $stmt_user->execute();
@@ -36,6 +39,9 @@ if (!$admin) {
     die("Admin account not found.");
 }
 $current_username = $admin['username'];
+$current_full_name = trim((string) ($admin['name'] ?? ''));
+$current_avatar = $admin['avatar_image'] ?? null;
+$current_avatar_mime = trim((string) ($admin['avatar_mime_type'] ?? ''));
 $stmt_user->close();
 $conn->close();
 ?>
@@ -245,6 +251,77 @@ $conn->close();
             font-size: 1rem;
         }
 
+        .profile-upload {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .75rem;
+            border: 1px dashed #b8c4d4;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .profile-upload input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        .profile-upload-button {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .55rem .8rem;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .profile-upload-button:hover {
+            background: #1d4ed8;
+        }
+
+        .profile-upload-name {
+            min-width: 0;
+            color: var(--text-muted);
+            font-size: .88rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            padding-right: 2.7rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: .4rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            margin: 0;
+            padding: 0;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+        }
+
         .modal-form .btn {
             width: 100%;
             padding: 0.75rem;
@@ -326,11 +403,30 @@ $conn->close();
         <div class="modal-content">
             <span class="modal-close">&times;</span>
             <h3>Edit My Admin Account</h3>
-            <p class="modal-subtitle">Update your username or password.</p>
+            <p class="modal-subtitle">Update your public profile, username, or password.</p>
 
-            <form id="edit-admin-form" action="updateadminaccount.php" method="POST" class="modal-form"
-                onsubmit="return validatePassword();">
+            <form id="edit-admin-form" action="updateadminaccount.php" method="POST" enctype="multipart/form-data"
+                class="modal-form" onsubmit="return validatePassword();">
                 <input type="hidden" name="EmployeeID" value="<?php echo $EmployeeID; ?>">
+
+                <div class="form-field">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" maxlength="150" value=""
+                        placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="avatar">Profile Avatar</label>
+                    <div class="profile-upload">
+                        <input type="file" id="avatar" name="avatar" accept=".jpg,.jpeg,.png,.gif,.webp">
+                        <label class="profile-upload-button" for="avatar">
+                            <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+                            Browse image
+                        </label>
+                        <span id="avatar-name" class="profile-upload-name">No image selected</span>
+                    </div>
+                    <small>Optional · JPG, PNG, GIF, or WEBP · Maximum 5 MB</small>
+                </div>
 
                 <div class="form-field">
                     <label for="username">Admin Username</label>
@@ -344,12 +440,22 @@ $conn->close();
 
                 <div class="form-field">
                     <label for="new_password">New Password</label>
-                    <input type="password" id="new_password" name="new_password">
+                    <div class="password-field">
+                        <input type="password" id="new_password" name="new_password">
+                        <button type="button" class="password-toggle" data-password-target="new_password"
+                            aria-label="Show password" title="Show password"><i class="fa-solid fa-eye"
+                                aria-hidden="true"></i></button>
+                    </div>
                 </div>
 
                 <div class="form-field">
                     <label for="confirm_password">Confirm New Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password">
+                    <div class="password-field">
+                        <input type="password" id="confirm_password" name="confirm_password">
+                        <button type="button" class="password-toggle" data-password-target="confirm_password"
+                            aria-label="Show password" title="Show password"><i class="fa-solid fa-eye"
+                                aria-hidden="true"></i></button>
+                    </div>
                 </div>
 
                 <input type="submit" name="update" value="Update Account" class="btn btn-success">
@@ -358,6 +464,26 @@ $conn->close();
     </div>
 
     <script>
+        const avatarInput = document.getElementById('avatar');
+        const avatarName = document.getElementById('avatar-name');
+        if (avatarInput && avatarName) {
+            avatarInput.addEventListener('change', function () {
+                avatarName.textContent = this.files.length ? this.files[0].name : 'No image selected';
+            });
+        }
+
+        document.querySelectorAll('.password-toggle').forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.passwordTarget);
+                if (!input) return;
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                this.querySelector('i').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+                this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+                this.title = isHidden ? 'Hide password' : 'Show password';
+            });
+        });
+
         const modal = document.getElementById('edit-account-form');
         const btn = document.getElementById('openEditModal');
         const span = document.querySelector('#edit-account-form .modal-close');

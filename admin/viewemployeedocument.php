@@ -2,61 +2,107 @@
 session_start();
 include_once '../db/conn.php';
 
-// Check for admin login, etc.
-// ...
+/* Optional: check admin login here */
+// if (!isset($_SESSION['username'])) {
+//     die("Access denied.");
+// }
 
-// 1. Get the EmployeeID and the document column name from the URL
-$EmployeeID = $_GET['id'] ?? 0;
+$EmployeeID = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $doc_column = $_GET['doc'] ?? '';
 
-// 2. A *crucial* security whitelist. This prevents SQL injection.
-//    Only column names in this list are allowed.
 $allowed_documents = [
-    'prc_file',
-    'dll_file',
-    'saln_file',
-    'ipcr_file',
-    'diploma_file',
-    'tor_file',
-    'itr_file',
-    'itr_file_2',
-    'service_record_file',
-    'appointment_file',
-    'trainings_awards_file',
-    'pds_file',
-    'ICS'
+    'prc_file' => 'prc',
+    'file_leave' => 'file_leave',
+    'dll_file' => 'leave_credit',
+    'saln_file' => 'saln',
+    'ipcr_file' => 'ipcr',
+    'diploma_file' => 'diploma',
+    'tor_file' => 'tor',
+    'itr_file' => 'itr',
+    'itr_file_2' => 'itr_2nd_copy',
+    'service_record_file' => 'service_record',
+    'appointment_file' => 'appointment',
+    'trainings_awards_file' => 'trainings_awards',
+    'pds_file' => 'pds',
+    'ICS' => 'ics'
 ];
 
-if ($EmployeeID == 0 || !in_array($doc_column, $allowed_documents)) {
+if ($EmployeeID <= 0 || !array_key_exists($doc_column, $allowed_documents)) {
     die("Invalid request or document type.");
 }
 
-// 3. Prepare the SQL query dynamically (this is safe now)
-//    We fetch the one specific BLOB column
-$sql = "SELECT $doc_column FROM employee_documents WHERE EmployeeID = ?";
+$baseFileName = $allowed_documents[$doc_column];
+
+/* Safe because column name is strictly whitelisted */
+$sql = "SELECT `$doc_column` AS file_data FROM employee_documents WHERE EmployeeID = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
+
 $stmt->bind_param("i", $EmployeeID);
 $stmt->execute();
 
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 
-if (!$row || empty($row[$doc_column])) {
+if (!$row || empty($row['file_data'])) {
+    $stmt->close();
+    $conn->close();
     die("File not found.");
 }
 
-$data = $row[$doc_column];
+$data = $row['file_data'];
 
-// 4. Detect the MIME type from the file's binary data
-//    This is the magic that tells the browser if it's a PDF or an image.
+/* Detect MIME type from binary data */
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime_type = $finfo->buffer($data);
 
-// 5. Send the correct headers and the file data
+if (!$mime_type) {
+    $mime_type = 'application/octet-stream';
+}
+
+/* Map MIME to extension */
+$mimeToExtension = [
+    'application/pdf' => 'pdf',
+    'application/msword' => 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    'application/vnd.ms-excel' => 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+    'text/csv' => 'csv',
+    'text/plain' => 'txt',
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'image/gif' => 'gif',
+    'image/webp' => 'webp'
+];
+
+$extension = $mimeToExtension[$mime_type] ?? 'bin';
+$fileName = $baseFileName . '.' . $extension;
+
+/* Only allow inline preview for browser-friendly files */
+$inlineMimeTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp'
+];
+
+$isInline = in_array($mime_type, $inlineMimeTypes, true);
+
 header("Content-Type: " . $mime_type);
 header("Content-Length: " . strlen($data));
-// This tells the browser to display the file, not download it
-header("Content-Disposition: inline");
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+if ($isInline) {
+    header('Content-Disposition: inline; filename="' . $fileName . '"');
+} else {
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+}
 
 echo $data;
 

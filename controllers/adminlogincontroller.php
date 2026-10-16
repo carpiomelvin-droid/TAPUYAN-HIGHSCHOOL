@@ -2,36 +2,48 @@
 session_start();
 include_once '../db/conn.php';
 
-
-// Login functionality for admin and staff
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    $sql = "SELECT * FROM admin WHERE username = ? AND (role = 'superadmin' OR role = 'staff') LIMIT 1";
+    $sql = "SELECT EmployeeID, Employeenumber, username, password, role FROM admin WHERE username = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $username);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['role'] = $row['role'];
-            $_SESSION['EmployeeID'] = $row['EmployeeID'];
-            if ($row['role'] == "superadmin") {
-                header("Location: ../admin/index.php");
-                exit;
-            } else {
-                header("Location: ../Employee/home.php");
-                exit;
-            }
+
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
+
+        // 🟢 PREVENT STAFF FROM LOGGING INTO ADMIN PORTAL
+        if ($user['role'] === 'staff') {
+            header("Location: ../index.php?error=wrong_role");
+            exit();
+        }
+        // Verify password
+        elseif (password_verify($password, $user['password'])) {
+            $_SESSION['EmployeeID'] = $user['EmployeeID'];
+            $_SESSION['Employeenumber'] = $user['Employeenumber'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['logged_in'] = true;
+
+            // Send to Admin Dashboard
+            header("Location: ../admin/index.php");
+            exit();
         } else {
-            echo "<script>alert('Invalid password!'); window.location.href='../index.php';</script>";
+            header("Location: ../index.php?error=invalid_password");
+            exit();
         }
     } else {
-        echo "<script>alert('User not found!'); window.location.href='../index.php';</script>";
+        header("Location: ../index.php?error=not_found");
+        exit();
     }
 
     $stmt->close();
     $conn->close();
+} else {
+    header("Location: ../index.php");
+    exit();
 }
+?>

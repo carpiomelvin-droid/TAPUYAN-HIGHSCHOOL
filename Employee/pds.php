@@ -10,6 +10,7 @@
     <script defer src="assets/js/bootstrap.min.js"></script>
     <script defer src="assets/js/script.js"></script>
     <title>Personal Data Sheet</title>
+
 </head>
 
 <body>
@@ -17,25 +18,34 @@
         <nav class="navbar navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
-                    <img src="https://getbootstrap.com//docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="30" height="24" class="d-inline-block align-text-top">
+                    <img src="https://getbootstrap.com//docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="30"
+                        height="24" class="d-inline-block align-text-top">
                     Personal Data Sheet
                 </a>
             </div>
         </nav>
     </div>
+
     <div class="container">
         <nav>
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">C1</button>
-                <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">C2</button>
-                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">C3</button>
-                <button class="nav-link" id="nav-contact2-tab" data-bs-toggle="tab" data-bs-target="#nav-contact2" type="button" role="tab" aria-controls="nav-contact2" aria-selected="false">C4</button>
+                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home"
+                    type="button" role="tab" aria-controls="nav-home" aria-selected="true">C1</button>
+                <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile"
+                    type="button" role="tab" aria-controls="nav-profile" aria-selected="false">C2</button>
+                <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact"
+                    type="button" role="tab" aria-controls="nav-contact" aria-selected="false">C3</button>
+                <button class="nav-link" id="nav-contact2-tab" data-bs-toggle="tab" data-bs-target="#nav-contact2"
+                    type="button" role="tab" aria-controls="nav-contact2" aria-selected="false">C4</button>
             </div>
         </nav>
+
         <div class="tab-content" id="nav-tabContent">
             <!-- START WHOLE C1 -->
             <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+
                 <div class="c1-container">
+
                     <div class="c1-container-header border-bottom">
                         <span>CS Form No. 212</span>
                         <br>
@@ -47,9 +57,12 @@
                         </center>
                         <br>
                         <p><b>
-                                WARNING: Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.
+                                WARNING: Any misrepresentation made in the Personal Data Sheet and the Work Experience
+                                Sheet shall cause the filing of administrative/criminal case/s against the person
+                                concerned.
                                 <br>
-                                READ THE ATTACHED GUIDE TO FILLING OUT THE PERSONAL DATA SHEET (PDS) BEFORE ACCOMPLISHING THE PDS FORM.
+                                READ THE ATTACHED GUIDE TO FILLING OUT THE PERSONAL DATA SHEET (PDS) BEFORE
+                                ACCOMPLISHING THE PDS FORM.
                             </b></p>
                     </div>
 
@@ -64,44 +77,62 @@
                                     <input type="text" class="form-control" id="CSID" placeholder="CSID">
                                 </div>
                             </div>
+
                             <br>
+
                             <h5><b> I. PERSONAL INFORMATION</b></h3>
                                 <hr>
                                 <br>
+
                                 <div class="form-group row">
                                     <label for="" class="col-sm-2 col-form-label">2. SURNAME</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="Surname" name="Surname" placeholder="Surname">
+                                        <input type="text" class="form-control" id="Surname" name="Surname"
+                                            placeholder="Surname">
                                     </div>
                                 </div>
+
                                 <br>
+
                                 <div class="form-group row">
                                     <label for="" class="col-sm-2 col-form-label">FIRST NAME</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="Firstname" name="Firstname" placeholder="Firstname">
+                                        <input type="text" class="form-control" id="Firstname" name="Firstname"
+                                            placeholder="Firstname">
                                     </div>
+
                                     <label for="" class="col-sm-2 col-form-label">NAME EXTENSION (JR., SR)</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="NameExtension" placeholder="NameExtension">
+                                        <input type="text" class="form-control" id="NameExtension"
+                                            placeholder="NameExtension">
                                     </div>
                                 </div>
+
                                 <br>
+
                                 <div class="form-group row">
                                     <label for="" class="col-sm-2 col-form-label">MIDDLE NAME</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="MiddleName" name="MiddleName" placeholder="MiddleName">
+                                        <input type="text" class="form-control" id="MiddleName" name="MiddleName"
+                                            placeholder="MiddleName">
                                     </div>
                                 </div>
                                 <br>
+
                         </div>
+
+
                         <hr>
+
+
                         <div class="holder-box-1">
                             <div class="box-1">
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">3. DATE OF BIRTH
                                         (mm/dd/yyyy) </label>
                                     <div class="col-sm-8">
-                                        <input type="date" class="form-control" id="DateOfBirth" placeholder="DateOfBirth">
+                                        <input type="date" class="form-control" id="DateOfBirth"
+                                            placeholder="DateOfBirth">
                                     </div>
                                 </div>
 
@@ -110,7 +141,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">4. PLACE OF BIRTH</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="PlaceOfBirth" placeholder="PlaceOfBirth">
+                                        <input type="text" class="form-control" id="PlaceOfBirth"
+                                            placeholder="PlaceOfBirth">
                                     </div>
                                 </div>
 
@@ -119,13 +151,15 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">5. SEX</label>
                                     <div class="col-sm-8">
-                                        <input class="form-check-input" type="radio" name="Sex" id="Male" checked value="Male">
+                                        <input class="form-check-input" type="radio" name="Sex" id="Male" checked
+                                            value="Male">
                                         <label class="form-check-label" for="Male">
                                             Male
                                         </label>
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="Sex" id="Female" value="Female">
+                                        <input class="form-check-input" type="radio" name="Sex" id="Female"
+                                            value="Female">
                                         <label class="form-check-label" for="Female">
                                             Female
                                         </label>
@@ -138,33 +172,38 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">6. CIVIL STATUS</label>
                                     <div class="col-sm-8">
-                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Single" value="Single" checked>
+                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Single"
+                                            value="Single" checked>
                                         <label class="form-check-label" for="Single">
                                             Single
                                         </label>
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Married" value="Married">
+                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Married"
+                                            value="Married">
                                         <label class="form-check-label" for="Married">
                                             Married
                                         </label>
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Widowed" value="Widowed">
+                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Widowed"
+                                            value="Widowed">
                                         <label class="form-check-label" for="Widowed">
                                             Widowed
                                         </label>
 
                                         <br>
 
-                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Seperated" value="Seperated">
+                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Seperated"
+                                            value="Seperated">
                                         <label class="form-check-label" for="Seperated">
                                             Seperated
                                         </label>
 
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Other/s" value="Other/s">
+                                        <input class="form-check-input" type="radio" name="CivilStatus" id="Other/s"
+                                            value="Other/s">
                                         <label class="form-check-label" for="Other/s">
                                             Other/s
                                         </label>
@@ -227,7 +266,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">12. PHILHEALTH NO.</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="PHILHEALTH" placeholder="PHILHEALTH">
+                                        <input type="text" class="form-control" id="PHILHEALTH"
+                                            placeholder="PHILHEALTH">
                                     </div>
                                 </div>
 
@@ -269,13 +309,15 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">16. CITIZENSHIP</label>
                                     <div class="col-sm-8">
-                                        <input class="form-check-input" type="radio" name="Citizenship1" id="Filipino" value="Filipino" checked>
+                                        <input class="form-check-input" type="radio" name="Citizenship1" id="Filipino"
+                                            value="Filipino" checked>
                                         <label class="form-check-label" for="Filipino">
                                             Filipino
                                         </label>
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="Citizenship1" id="Dual" value="Dual">
+                                        <input class="form-check-input" type="radio" name="Citizenship1" id="Dual"
+                                            value="Dual">
                                         <label class="form-check-label" for="Dual">
                                             Dual Citizenship
                                         </label>
@@ -286,13 +328,15 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label"></label>
                                     <div class="col-sm-8">
-                                        <input class="form-check-input" type="radio" name="Citizenship2" id="Birth" value="by birth" checked>
+                                        <input class="form-check-input" type="radio" name="Citizenship2" id="Birth"
+                                            value="by birth" checked>
                                         <label class="form-check-label" for="Birth">
                                             by birth
                                         </label>
 
                                         &nbsp;&nbsp;
-                                        <input class="form-check-input" type="radio" name="Citizenship2" id="Naturalization" value="by naturalization">
+                                        <input class="form-check-input" type="radio" name="Citizenship2"
+                                            id="Naturalization" value="by naturalization">
                                         <label class="form-check-label" for="Naturalization">
                                             by naturalization
                                         </label>
@@ -304,10 +348,12 @@
                                 </div>
 
                                 <div class="form-group row">
-                                    <label for="" class="col-sm-4 col-form-label">If holder of dual citizenship, please indicate the details.</label>
+                                    <label for="" class="col-sm-4 col-form-label">If holder of dual citizenship, please
+                                        indicate the details.</label>
                                     <div class="col-sm-8">
                                         <br>
-                                        <input class="form-control" list="datalistOptions" id="DualCountry" placeholder="DualCountry">
+                                        <input class="form-control" list="datalistOptions" id="DualCountry"
+                                            placeholder="DualCountry">
                                         <datalist id="DualCountry">
                                             <option>select country</option>
                                             <option value="AF">Afghanistan</option>
@@ -571,7 +617,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">17. RESIDENTIAL ADDRESS</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="ResHouse_Block_LotNo" placeholder="ResHouse_Block_LotNo">
+                                        <input type="text" class="form-control" id="ResHouse_Block_LotNo"
+                                            placeholder="ResHouse_Block_LotNo">
                                     </div>
                                     <div class="col-sm-4">
                                         <input type="text" class="form-control" id="ResStreet" placeholder="ResStreet">
@@ -583,10 +630,12 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label"></label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="ResSubdivision_Village" placeholder="ResSubdivision_Village">
+                                        <input type="text" class="form-control" id="ResSubdivision_Village"
+                                            placeholder="ResSubdivision_Village">
                                     </div>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="ResBarangay" placeholder="ResBarangay">
+                                        <input type="text" class="form-control" id="ResBarangay"
+                                            placeholder="ResBarangay">
                                     </div>
                                 </div>
 
@@ -595,10 +644,12 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label"></label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="ResCity_Municipality" placeholder="ResCity_Municipality">
+                                        <input type="text" class="form-control" id="ResCity_Municipality"
+                                            placeholder="ResCity_Municipality">
                                     </div>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="ResProvince" placeholder="ResProvince">
+                                        <input type="text" class="form-control" id="ResProvince"
+                                            placeholder="ResProvince">
                                     </div>
                                 </div>
 
@@ -610,7 +661,8 @@
                                         <center>ZIP CODE</center>
                                     </label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="ResZipCode" placeholder="ResZipCode">
+                                        <input type="text" class="form-control" id="ResZipCode"
+                                            placeholder="ResZipCode">
                                     </div>
                                 </div>
 
@@ -621,7 +673,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">18. PERMANENT ADDRESS</label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="PerHouse_Block_LotNo" placeholder="PerHouse_Block_LotNo">
+                                        <input type="text" class="form-control" id="PerHouse_Block_LotNo"
+                                            placeholder="PerHouse_Block_LotNo">
                                     </div>
                                     <div class="col-sm-4">
                                         <input type="text" class="form-control" id="PerStreet" placeholder="PerStreet">
@@ -633,10 +686,12 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label"></label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="PerSubdivision_Village" placeholder="PerSubdivision_Village">
+                                        <input type="text" class="form-control" id="PerSubdivision_Village"
+                                            placeholder="PerSubdivision_Village">
                                     </div>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="PerBarangay" placeholder="PerBarangay">
+                                        <input type="text" class="form-control" id="PerBarangay"
+                                            placeholder="PerBarangay">
                                     </div>
                                 </div>
 
@@ -645,10 +700,12 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label"></label>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="PerCity_Municipality" placeholder="PerCity_Municipality">
+                                        <input type="text" class="form-control" id="PerCity_Municipality"
+                                            placeholder="PerCity_Municipality">
                                     </div>
                                     <div class="col-sm-4">
-                                        <input type="text" class="form-control" id="PerProvince" placeholder="PerProvince">
+                                        <input type="text" class="form-control" id="PerProvince"
+                                            placeholder="PerProvince">
                                     </div>
                                 </div>
 
@@ -660,7 +717,8 @@
                                         <center>ZIP CODE</center>
                                     </label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="PerZipCode" placeholder="PerZipCode">
+                                        <input type="text" class="form-control" id="PerZipCode"
+                                            placeholder="PerZipCode">
                                     </div>
                                 </div>
 
@@ -669,7 +727,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">19. TELEPHONE NO.</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="TelephoneNumber" placeholder="TelephoneNumber">
+                                        <input type="text" class="form-control" id="TelephoneNumber"
+                                            placeholder="TelephoneNumber">
                                     </div>
                                 </div>
 
@@ -678,7 +737,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-4 col-form-label">20. MOBILE NO.</label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="MobileNumber" placeholder="MobileNumber">
+                                        <input type="text" class="form-control" id="MobileNumber"
+                                            placeholder="MobileNumber">
                                     </div>
                                 </div>
 
@@ -703,7 +763,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">22. SPOUSE'S SURNAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_Surname" placeholder="Spouse_Surname">
+                                            <input type="text" class="form-control" id="Spouse_Surname"
+                                                placeholder="Spouse_Surname">
                                         </div>
                                     </div>
 
@@ -712,12 +773,14 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> FIRST NAME</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control" id="Spouse_Firstname" placeholder="Spouse_Firstname">
+                                            <input type="text" class="form-control" id="Spouse_Firstname"
+                                                placeholder="Spouse_Firstname">
                                         </div>
 
                                         <label for="" class="col-sm-2 col-form-label"> NAME EXTENSION (JR., SR)</label>
                                         <div class="col-sm-2">
-                                            <input type="text" class="form-control" id="Spouse_NameExtension" placeholder="Spouse_NameExtension">
+                                            <input type="text" class="form-control" id="Spouse_NameExtension"
+                                                placeholder="Spouse_NameExtension">
                                         </div>
                                     </div>
 
@@ -726,7 +789,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> MIDDLE NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_Middlename" placeholder="Spouse_Middlename">
+                                            <input type="text" class="form-control" id="Spouse_Middlename"
+                                                placeholder="Spouse_Middlename">
                                         </div>
                                     </div>
 
@@ -735,7 +799,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> OCCUPATION</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_Occupation" placeholder="Spouse_Occupation">
+                                            <input type="text" class="form-control" id="Spouse_Occupation"
+                                                placeholder="Spouse_Occupation">
                                         </div>
                                     </div>
 
@@ -744,7 +809,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> EMPLOYER/BUSINESS NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_Employer_Businessname" placeholder="Spouse_Employer_Businessname">
+                                            <input type="text" class="form-control" id="Spouse_Employer_Businessname"
+                                                placeholder="Spouse_Employer_Businessname">
                                         </div>
                                     </div>
 
@@ -753,7 +819,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> BUSINESS ADDRESS</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_BusinessAddress" placeholder="Spouse_BusinessAddress">
+                                            <input type="text" class="form-control" id="Spouse_BusinessAddress"
+                                                placeholder="Spouse_BusinessAddress">
                                         </div>
                                     </div>
 
@@ -762,32 +829,38 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> TELEPHONE NO.</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Spouse_TelephoneNumber" placeholder="Spouse_TelephoneNumber">
+                                            <input type="text" class="form-control" id="Spouse_TelephoneNumber"
+                                                placeholder="Spouse_TelephoneNumber">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="box-1" style="margin-left: 1%;">
                                     <div class="form-group row">
-                                        <label for="" class="col-sm-6 col-form-label">23. NAME of CHILDREN (Write full name and list all)</label>
-                                        <label for="" class="col-sm-6 col-form-label">DATE OF BIRTH (mm/dd/yyyy) </label>
+                                        <label for="" class="col-sm-6 col-form-label">23. NAME of CHILDREN (Write full
+                                            name and list all)</label>
+                                        <label for="" class="col-sm-6 col-form-label">DATE OF BIRTH (mm/dd/yyyy)
+                                        </label>
                                     </div>
                                     <br>
                                     <div class="form-group row">
                                         <div class="col-sm-6">
-                                            <input type="text" class="form-control" id="Children_Fullname" placeholder="Children_Fullname">
+                                            <input type="text" class="form-control" id="Children_Fullname"
+                                                placeholder="Children_Fullname">
 
                                         </div>
                                         <br>
                                         <br>
                                         <div class="col-sm-4">
-                                            <input type="date" class="form-control" id="Children_Birthdate" placeholder="Children_Birthdate">
+                                            <input type="date" class="form-control" id="Children_Birthdate"
+                                                placeholder="Children_Birthdate">
                                         </div>
                                         <br>
                                         <br>
 
                                         <div class="col-sm-2">
-                                            <input type="button" class="btn btn-dark" id="Spouse-Add-Children" value="ADD">
+                                            <input type="button" class="btn btn-dark" id="Spouse-Add-Children"
+                                                value="ADD">
                                         </div>
                                     </div>
 
@@ -818,7 +891,8 @@
 
                                     <div class="form-group row">
                                         <hr style="margin: 0;">
-                                        <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                        <label for="" class="col-sm-12 col-form-label"
+                                            style="font-size: 0.5em; color: red; font-style: italic;">
                                             <center>(Continue on separate sheet if necessary)</center>
                                         </label>
                                         <hr>
@@ -836,7 +910,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">23. FATHER'S SURNAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Father_Surname" placeholder="Father_Surname">
+                                            <input type="text" class="form-control" id="Father_Surname"
+                                                placeholder="Father_Surname">
                                         </div>
                                     </div>
 
@@ -845,12 +920,14 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label"> FIRST NAME</label>
                                         <div class="col-sm-4">
-                                            <input type="text" class="form-control" id="Father_Firstname" placeholder="Father_Firstname">
+                                            <input type="text" class="form-control" id="Father_Firstname"
+                                                placeholder="Father_Firstname">
                                         </div>
 
                                         <label for="" class="col-sm-2 col-form-label"> NAME EXTENSION (JR., SR)</label>
                                         <div class="col-sm-2">
-                                            <input type="text" class="form-control" id="Father_NameExtension" placeholder="Father_NameExtension">
+                                            <input type="text" class="form-control" id="Father_NameExtension"
+                                                placeholder="Father_NameExtension">
                                         </div>
                                     </div>
 
@@ -859,7 +936,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">MIDDLE NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Father_Middlename" placeholder="Father_Middlename">
+                                            <input type="text" class="form-control" id="Father_Middlename"
+                                                placeholder="Father_Middlename">
                                         </div>
                                     </div>
 
@@ -868,7 +946,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">24. MOTHER'S MAIDEN NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Mother_MaidenName" placeholder="Mother_MaidenName">
+                                            <input type="text" class="form-control" id="Mother_MaidenName"
+                                                placeholder="Mother_MaidenName">
                                         </div>
                                     </div>
 
@@ -877,7 +956,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">SURNAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Mother_Surname" placeholder="Mother_Surname">
+                                            <input type="text" class="form-control" id="Mother_Surname"
+                                                placeholder="Mother_Surname">
                                         </div>
                                     </div>
 
@@ -886,7 +966,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">FIRST NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Mother_Firstname" placeholder="Mother_Firstname">
+                                            <input type="text" class="form-control" id="Mother_Firstname"
+                                                placeholder="Mother_Firstname">
                                         </div>
                                     </div>
 
@@ -895,7 +976,8 @@
                                     <div class="form-group row">
                                         <label for="" class="col-sm-4 col-form-label">MIDDLE NAME</label>
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control" id="Mother_Middlename" placeholder="Mother_Middlename">
+                                            <input type="text" class="form-control" id="Mother_Middlename"
+                                                placeholder="Mother_Middlename">
                                         </div>
                                     </div>
 
@@ -927,19 +1009,24 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-2 col-form-label">NAME OF SCHOOL (Write in full)</label>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="NOF_Elementary" placeholder="NOF_Elementary">
+                                        <input type="text" class="form-control" id="NOF_Elementary"
+                                            placeholder="NOF_Elementary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="NOF_Secondary" placeholder="NOF_Secondary">
+                                        <input type="text" class="form-control" id="NOF_Secondary"
+                                            placeholder="NOF_Secondary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="NOF_Vocational" placeholder="NOF_Vocational">
+                                        <input type="text" class="form-control" id="NOF_Vocational"
+                                            placeholder="NOF_Vocational">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="NOF_College" placeholder="NOF_College">
+                                        <input type="text" class="form-control" id="NOF_College"
+                                            placeholder="NOF_College">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="NOF_Graduate" placeholder="NOF_Graduate">
+                                        <input type="text" class="form-control" id="NOF_Graduate"
+                                            placeholder="NOF_Graduate">
                                     </div>
                                     <br>
                                     <br>
@@ -949,21 +1036,27 @@
                                 </div>
 
                                 <div class="form-group row">
-                                    <label for="" class="col-sm-2 col-form-label">BASIC EDUCATION / DEGREE/COURSE (Write in full) </label>
+                                    <label for="" class="col-sm-2 col-form-label">BASIC EDUCATION / DEGREE/COURSE (Write
+                                        in full) </label>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="BE_D_C_Elementary" placeholder="BE_D_C_Elementary">
+                                        <input type="text" class="form-control" id="BE_D_C_Elementary"
+                                            placeholder="BE_D_C_Elementary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="BE_D_C_Secondary" placeholder="BE_D_C_Secondary">
+                                        <input type="text" class="form-control" id="BE_D_C_Secondary"
+                                            placeholder="BE_D_C_Secondary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="BE_D_C_Vocational" placeholder="BE_D_C_Vocational">
+                                        <input type="text" class="form-control" id="BE_D_C_Vocational"
+                                            placeholder="BE_D_C_Vocational">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="BE_D_C_College" placeholder="BE_D_C_College">
+                                        <input type="text" class="form-control" id="BE_D_C_College"
+                                            placeholder="BE_D_C_College">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="BE_D_C_Graduate" placeholder="BE_D_C_Graduate">
+                                        <input type="text" class="form-control" id="BE_D_C_Graduate"
+                                            placeholder="BE_D_C_Graduate">
                                     </div>
                                     <br>
                                     <br>
@@ -981,36 +1074,46 @@
 
                                     <div class="col-sm-2">
                                         <label for="">ELEMENTARY</label>
-                                        <input type="text" class="form-control" id="POA_From_Elementary" placeholder="POA_From_Elementary">
-                                        <input type="text" class="form-control" id="POA_To_Elementary" placeholder="POA_To_Elementary">
+                                        <input type="text" class="form-control" id="POA_From_Elementary"
+                                            placeholder="POA_From_Elementary">
+                                        <input type="text" class="form-control" id="POA_To_Elementary"
+                                            placeholder="POA_To_Elementary">
                                         <br>
                                     </div>
 
                                     <div class="col-sm-2">
                                         <label for="">SECONDARY</label>
-                                        <input type="text" class="form-control" id="POA_From_Secondary" placeholder="POA_From_Secondary">
-                                        <input type="text" class="form-control" id="POA_To_Secondary" placeholder="POA_To_Secondary">
+                                        <input type="text" class="form-control" id="POA_From_Secondary"
+                                            placeholder="POA_From_Secondary">
+                                        <input type="text" class="form-control" id="POA_To_Secondary"
+                                            placeholder="POA_To_Secondary">
                                         <br>
                                     </div>
 
                                     <div class="col-sm-2">
                                         <label for="">Vocational COURSE</label>
-                                        <input type="text" class="form-control" id="POA_From_Vocational" placeholder="POA_From_Vocational">
-                                        <input type="text" class="form-control" id="POA_To_Vocational" placeholder="POA_To_Vocational">
+                                        <input type="text" class="form-control" id="POA_From_Vocational"
+                                            placeholder="POA_From_Vocational">
+                                        <input type="text" class="form-control" id="POA_To_Vocational"
+                                            placeholder="POA_To_Vocational">
                                         <br>
                                     </div>
 
                                     <div class="col-sm-2">
                                         <label for="">COLLEGE</label>
-                                        <input type="text" class="form-control" id="POA_From_College" placeholder="POA_From_College">
-                                        <input type="text" class="form-control" id="POA_To_College" placeholder="POA_To_College">
+                                        <input type="text" class="form-control" id="POA_From_College"
+                                            placeholder="POA_From_College">
+                                        <input type="text" class="form-control" id="POA_To_College"
+                                            placeholder="POA_To_College">
                                         <br>
                                     </div>
 
                                     <div class="col-sm-2">
                                         <label for="">GRADUATE STUDIES</label>
-                                        <input type="text" class="form-control" id="POA_From_Graduate" placeholder="POA_From_Graduate">
-                                        <input type="text" class="form-control" id="POA_To_Graduate" placeholder="POA_To_Graduate">
+                                        <input type="text" class="form-control" id="POA_From_Graduate"
+                                            placeholder="POA_From_Graduate">
+                                        <input type="text" class="form-control" id="POA_To_Graduate"
+                                            placeholder="POA_To_Graduate">
                                         <br>
                                     </div>
                                     <hr>
@@ -1018,21 +1121,27 @@
 
 
                                 <div class="form-group row">
-                                    <label for="" class="col-sm-2 col-form-label">HIGHEST LEVEL / UNITS EARNED (if not graduated)</label>
+                                    <label for="" class="col-sm-2 col-form-label">HIGHEST LEVEL / UNITS EARNED (if not
+                                        graduated)</label>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="HL_UE_Elementary" placeholder="HL_UE_Elementary">
+                                        <input type="text" class="form-control" id="HL_UE_Elementary"
+                                            placeholder="HL_UE_Elementary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="HL_UE_Secondary" placeholder="HL_UE_Secondary">
+                                        <input type="text" class="form-control" id="HL_UE_Secondary"
+                                            placeholder="HL_UE_Secondary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="HL_UE_Vocational" placeholder="HL_UE_Vocational">
+                                        <input type="text" class="form-control" id="HL_UE_Vocational"
+                                            placeholder="HL_UE_Vocational">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="HL_UE_College" placeholder="HL_UE_College">
+                                        <input type="text" class="form-control" id="HL_UE_College"
+                                            placeholder="HL_UE_College">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="HL_UE_Graduate" placeholder="HL_UE_Graduate">
+                                        <input type="text" class="form-control" id="HL_UE_Graduate"
+                                            placeholder="HL_UE_Graduate">
                                     </div>
                                     <br>
                                     <br>
@@ -1044,19 +1153,24 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-2 col-form-label">YEAR GRADUATED</label>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="YR_G_Elementary" placeholder="YR_G_Elementary">
+                                        <input type="text" class="form-control" id="YR_G_Elementary"
+                                            placeholder="YR_G_Elementary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="YR_G_Secondary" placeholder="YR_G_Secondary">
+                                        <input type="text" class="form-control" id="YR_G_Secondary"
+                                            placeholder="YR_G_Secondary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="YR_G_Vocational" placeholder="YR_G_Vocational">
+                                        <input type="text" class="form-control" id="YR_G_Vocational"
+                                            placeholder="YR_G_Vocational">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="YR_G_College" placeholder="YR_G_College">
+                                        <input type="text" class="form-control" id="YR_G_College"
+                                            placeholder="YR_G_College">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="YR_G_Graduate" placeholder="YR_G_Graduate">
+                                        <input type="text" class="form-control" id="YR_G_Graduate"
+                                            placeholder="YR_G_Graduate">
                                     </div>
                                     <br>
                                     <br>
@@ -1066,27 +1180,34 @@
 
 
                                 <div class="form-group row">
-                                    <label for="" class="col-sm-2 col-form-label">SCHOLARSHIP/ ACADEMIC HONORS RECEIVED</label>
+                                    <label for="" class="col-sm-2 col-form-label">SCHOLARSHIP/ ACADEMIC HONORS
+                                        RECEIVED</label>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="Scho_AHR_Elementary" placeholder="Scho_AHR_Elementary">
+                                        <input type="text" class="form-control" id="Scho_AHR_Elementary"
+                                            placeholder="Scho_AHR_Elementary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="Scho_AHR_Secondary" placeholder="Scho_AHR_Secondary">
+                                        <input type="text" class="form-control" id="Scho_AHR_Secondary"
+                                            placeholder="Scho_AHR_Secondary">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="Scho_AHR_Vocational" placeholder="Scho_AHR_Vocational">
+                                        <input type="text" class="form-control" id="Scho_AHR_Vocational"
+                                            placeholder="Scho_AHR_Vocational">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="Scho_AHR_College" placeholder="Scho_AHR_College">
+                                        <input type="text" class="form-control" id="Scho_AHR_College"
+                                            placeholder="Scho_AHR_College">
                                     </div>
                                     <div class="col-sm-2">
-                                        <input type="text" class="form-control" id="Scho_AHR_Graduate" placeholder="Scho_AHR_Graduate">
+                                        <input type="text" class="form-control" id="Scho_AHR_Graduate"
+                                            placeholder="Scho_AHR_Graduate">
                                     </div>
                                     <br>
                                     <br>
                                     <br>
                                     <hr style="margin: 0;">
-                                    <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                    <label for="" class="col-sm-12 col-form-label"
+                                        style="font-size: 0.5em; color: red; font-style: italic;">
                                         <center>(Continue on separate sheet if necessary)</center>
                                     </label>
                                     <hr>
@@ -1137,7 +1258,8 @@
                             <div class="form-group row">
                                 <label for="" class="col-sm-1 col-form-label inputting-0">27.</label>
                                 <label for="" class="col-sm-3 col-form-label border-end inputting-0 text-center">
-                                    CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER SPECIAL LAWS/ CES/ CSEE BARANGAY ELIGIBILITY / DRIVER'S LICENSE
+                                    CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER SPECIAL LAWS/ CES/ CSEE BARANGAY
+                                    ELIGIBILITY / DRIVER'S LICENSE
                                 </label>
                                 <label for="" class="col-sm-1 col-form-label border-end inputting-0 text-center">
                                     RATING
@@ -1153,8 +1275,10 @@
                                     LICENSE (if applicable)
                                     <hr>
                                     <div class="form-group row">
-                                        <label for="" class="col-sm-6 col-form-label border-end inputting-0 text-center">NUMBER</label>
-                                        <label for="" class="col-sm-6 col-form-label inputting-0 text-center">Date of Validity</label>
+                                        <label for=""
+                                            class="col-sm-6 col-form-label border-end inputting-0 text-center">NUMBER</label>
+                                        <label for="" class="col-sm-6 col-form-label inputting-0 text-center">Date of
+                                            Validity</label>
                                     </div>
                                 </label>
                             </div>
@@ -1164,8 +1288,10 @@
                             <div class="form-group row border-top">
                                 <div class="col-sm-4">
                                     <br>
-                                    <label class="inputting" for="">27. CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER SPECIAL LAWS/ CES/ CSEE BARANGAY ELIGIBILITY / DRIVER'S LICENSE</label>
-                                    <input type="text" class="form-control" id="CS_RA_CES_CSEE_DL" placeholder="CS_RA_CES_CSEE_DL">
+                                    <label class="inputting" for="">27. CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER
+                                        SPECIAL LAWS/ CES/ CSEE BARANGAY ELIGIBILITY / DRIVER'S LICENSE</label>
+                                    <input type="text" class="form-control" id="CS_RA_CES_CSEE_DL"
+                                        placeholder="CS_RA_CES_CSEE_DL">
                                 </div>
 
                                 <div class="col-sm-1">
@@ -1194,8 +1320,10 @@
                                             <input type="text" class="form-control" id="LNumber" placeholder="LNumber">
                                         </div>
                                         <div class="col-sm-6">
-                                            <label class="inputting" for="">LICENSE (if applicable) Date of Validity</label>
-                                            <input type="text" class="form-control" id="LValidity" placeholder="LValidity">
+                                            <label class="inputting" for="">LICENSE (if applicable) Date of
+                                                Validity</label>
+                                            <input type="text" class="form-control" id="LValidity"
+                                                placeholder="LValidity">
                                         </div>
                                     </div>
                                 </div>
@@ -1219,7 +1347,8 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
-                                                <th scope="col">CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER SPECIAL LAWS/ CES/ CSEE BARANGAY ELIGIBILITY / DRIVER'S LICENSE</th>
+                                                <th scope="col">CAREER SERVICE/ RA 1080 (BOARD/ BAR) UNDER SPECIAL LAWS/
+                                                    CES/ CSEE BARANGAY ELIGIBILITY / DRIVER'S LICENSE</th>
                                                 <th scope="col">RATING</th>
                                                 <th scope="col">DATE OF EXAMINATION / CONFERMENT</th>
                                                 <th scope="col">PLACE OF EXAMINATION / CONFERMENT</th>
@@ -1239,7 +1368,8 @@
                                 <br>
                                 <br>
                                 <hr style="margin: 0;">
-                                <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                <label for="" class="col-sm-12 col-form-label"
+                                    style="font-size: 0.5em; color: red; font-style: italic;">
                                     <center>(Continue on separate sheet if necessary)</center>
                                 </label>
                                 <hr>
@@ -1312,13 +1442,17 @@
                                         <div class="form-group row">
                                             <div class="col-sm-6">
                                                 <br>
-                                                <label class="inputting" for="">28. INCLUSIVE DATES <br> (mm/dd/yyyy) From</label>
-                                                <input type="date" class="form-control" id="V_I_D_From" placeholder="V_I_D_From">
+                                                <label class="inputting" for="">28. INCLUSIVE DATES <br> (mm/dd/yyyy)
+                                                    From</label>
+                                                <input type="date" class="form-control" id="V_I_D_From"
+                                                    placeholder="V_I_D_From">
                                             </div>
                                             <div class="col-sm-6">
                                                 <br>
-                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy) To</label>
-                                                <input type="date" class="form-control" id="V_I_D_To" placeholder="V_I_D_To">
+                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy)
+                                                    To</label>
+                                                <input type="date" class="form-control" id="V_I_D_To"
+                                                    placeholder="V_I_D_To">
                                             </div>
                                         </div>
                                     </div>
@@ -1326,13 +1460,16 @@
 
                                     <div class="col-sm-2">
                                         <br>
-                                        <label class="inputting" for="">POSITION TITLE <br> (Write in full/Do not abbreviate)</label>
-                                        <input type="text" class="form-control" id="V_PosTitle" placeholder="V_PosTitle">
+                                        <label class="inputting" for="">POSITION TITLE <br> (Write in full/Do not
+                                            abbreviate)</label>
+                                        <input type="text" class="form-control" id="V_PosTitle"
+                                            placeholder="V_PosTitle">
                                     </div>
 
                                     <div class="col-sm-2">
                                         <br>
-                                        <label class="inputting" for="">DEPARTMENT / AGENCY / OFFICE / COMPANY <br> (Write in full/Do not abbreviate)</label>
+                                        <label class="inputting" for="">DEPARTMENT / AGENCY / OFFICE / COMPANY <br>
+                                            (Write in full/Do not abbreviate)</label>
                                         <input type="text" class="form-control" id="V_D_A_O_C" placeholder="V_D_A_O_C">
                                     </div>
 
@@ -1344,7 +1481,8 @@
 
                                     <div class="col-sm-1">
                                         <br>
-                                        <label class="inputting" for="">SALARY/ JOB/ PAY GRADE (if applicable) <br> & STEP (Format "00-0") / INCREMENT</label>
+                                        <label class="inputting" for="">SALARY/ JOB/ PAY GRADE (if applicable) <br> &
+                                            STEP (Format "00-0") / INCREMENT</label>
                                         <input type="text" class="form-control" id="V_S_J_PG" placeholder="V_S_J_PG">
                                     </div>
 
@@ -1402,7 +1540,8 @@
                                     <br>
                                     <br>
                                     <hr style="margin: 0;">
-                                    <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                    <label for="" class="col-sm-12 col-form-label"
+                                        style="font-size: 0.5em; color: red; font-style: italic;">
                                         <center>(Continue on separate sheet if necessary)</center>
                                     </label>
                                     <hr>
@@ -1437,7 +1576,8 @@
 
                         <br>
 
-                        <h5><b>VI. VOLUNTARY WORK OR INVOLVEMENT IN CIVIC / NON-GOVERNMENT / PEOPLE / VOLUNTARY ORGANIZATION/S</b></h3>
+                        <h5><b>VI. VOLUNTARY WORK OR INVOLVEMENT IN CIVIC / NON-GOVERNMENT / PEOPLE / VOLUNTARY
+                                ORGANIZATION/S</b></h3>
                             <hr class="inputting-0">
                             <br class="inputting-0">
 
@@ -1450,7 +1590,8 @@
                                     INCLUSIVE DATES <br> (mm/dd/yyyy)
                                     <hr>
                                     <div class="form-group row">
-                                        <label for="" class="col-sm-6 col-form-label border-end inputting-0 text-center">From</label>
+                                        <label for=""
+                                            class="col-sm-6 col-form-label border-end inputting-0 text-center">From</label>
                                         <label for="" class="col-sm-6 col-form-label inputting-0 text-center">To</label>
                                     </div>
                                 </label>
@@ -1467,7 +1608,8 @@
                             <div class="form-group row border-top">
                                 <div class="col-sm-4">
                                     <br>
-                                    <label class="inputting" for="">NAME & ADDRESS OF ORGANIZATION <br> (Write in full)</label>
+                                    <label class="inputting" for="">NAME & ADDRESS OF ORGANIZATION <br> (Write in
+                                        full)</label>
                                     <input type="text" class="form-control" id="NAOF" placeholder="NAOF">
                                 </div>
 
@@ -1476,12 +1618,15 @@
                                     <br>
                                     <div class="form-group row">
                                         <div class="col-sm-6">
-                                            <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy) From</label>
-                                            <input type="text" class="form-control" id="VI_I_D_From" placeholder="VI_I_D_From">
+                                            <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy)
+                                                From</label>
+                                            <input type="text" class="form-control" id="VI_I_D_From"
+                                                placeholder="VI_I_D_From">
                                         </div>
                                         <div class="col-sm-6">
                                             <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy) To</label>
-                                            <input type="text" class="form-control" id="VI_I_D_To" placeholder="VI_I_D_To">
+                                            <input type="text" class="form-control" id="VI_I_D_To"
+                                                placeholder="VI_I_D_To">
                                         </div>
                                     </div>
                                 </div>
@@ -1531,7 +1676,8 @@
                                 <br>
                                 <br>
                                 <hr style="margin: 0;">
-                                <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                <label for="" class="col-sm-12 col-form-label"
+                                    style="font-size: 0.5em; color: red; font-style: italic;">
                                     <center>(Continue on separate sheet if necessary)</center>
                                 </label>
                                 <hr>
@@ -1540,21 +1686,26 @@
                             <br>
 
                             <h5><b>VII. LEARNING AND DEVELOPMENT (L&D) INTERVENTIONS/TRAINING PROGRAMS ATTENDED</b></h3>
-                                <h6>(Start from the most recent L&D/training program and include only the relevant L&D/training taken for the last five (5) years for Division Chief/Executive/Managerial positions)</h6>
+                                <h6>(Start from the most recent L&D/training program and include only the relevant
+                                    L&D/training taken for the last five (5) years for Division
+                                    Chief/Executive/Managerial positions)</h6>
                                 <hr class="inputting-0">
                                 <br class="inputting-0">
 
                                 <div class="form-group row">
                                     <label for="" class="col-sm-1 col-form-label inputting-0">30.</label>
                                     <label for="" class="col-sm-3 col-form-label border-end inputting-0 text-center">
-                                        TITLE OF LEARNING AND DEVELOPMENT INTERVENTIONS/TRAINING PROGRAMS <br> (Write in full)
+                                        TITLE OF LEARNING AND DEVELOPMENT INTERVENTIONS/TRAINING PROGRAMS <br> (Write in
+                                        full)
                                     </label>
                                     <label for="" class="col-sm-3 col-form-label inputting-0 border-end text-center">
                                         INCLUSIVE DATES OF ATTENDANCE <br> (mm/dd/yyyy)
                                         <hr>
                                         <div class="form-group row">
-                                            <label for="" class="col-sm-6 col-form-label border-end inputting-0 text-center">From</label>
-                                            <label for="" class="col-sm-6 col-form-label inputting-0 text-center">To</label>
+                                            <label for=""
+                                                class="col-sm-6 col-form-label border-end inputting-0 text-center">From</label>
+                                            <label for=""
+                                                class="col-sm-6 col-form-label inputting-0 text-center">To</label>
                                         </div>
                                     </label>
                                     <label for="" class="col-sm-1 col-form-label border-end inputting-0 text-center">
@@ -1573,7 +1724,8 @@
                                 <div class="form-group row border-top">
                                     <div class="col-sm-4">
                                         <br>
-                                        <label class="inputting" for="">TITLE OF LEARNING AND DEVELOPMENT INTERVENTIONS/TRAINING PROGRAMS <br> (Write in full)</label>
+                                        <label class="inputting" for="">TITLE OF LEARNING AND DEVELOPMENT
+                                            INTERVENTIONS/TRAINING PROGRAMS <br> (Write in full)</label>
                                         <input type="text" class="form-control" id="TOLADI_TP" placeholder="TOLADI_TP">
                                     </div>
 
@@ -1582,12 +1734,16 @@
                                         <br>
                                         <div class="form-group row">
                                             <div class="col-sm-6">
-                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy) From</label>
-                                                <input type="text" class="form-control" id="VII_I_D_From" placeholder="VII_I_D_From">
+                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy)
+                                                    From</label>
+                                                <input type="text" class="form-control" id="VII_I_D_From"
+                                                    placeholder="VII_I_D_From">
                                             </div>
                                             <div class="col-sm-6">
-                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy) To</label>
-                                                <input type="text" class="form-control" id="VII_I_D_To" placeholder="VII_I_D_To">
+                                                <label class="inputting" for="">INCLUSIVE DATES <br> (mm/dd/yyyy)
+                                                    To</label>
+                                                <input type="text" class="form-control" id="VII_I_D_To"
+                                                    placeholder="VII_I_D_To">
                                             </div>
                                         </div>
                                     </div>
@@ -1600,14 +1756,16 @@
 
                                     <div class="col-sm-1">
                                         <br>
-                                        <label class="inputting" for="">Type of LD ( Managerial / Supervisory / Technical/etc) </label>
+                                        <label class="inputting" for="">Type of LD ( Managerial / Supervisory /
+                                            Technical/etc) </label>
                                         <input type="text" class="form-control" id="VII_TOLD" placeholder="VII_TOLD">
                                     </div>
 
                                     <div class="col-sm-3">
                                         <br>
                                         <label class="inputting" for="">POSITION / NATURE OF WORK</label>
-                                        <input type="text" class="form-control" id="VII_POS_NOF" placeholder="VII_POS_NOF">
+                                        <input type="text" class="form-control" id="VII_POS_NOF"
+                                            placeholder="VII_POS_NOF">
                                     </div>
                                 </div>
 
@@ -1626,7 +1784,8 @@
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <th scope="col">TITLE OF LEARNING AND DEVELOPMENT INTERVENTIONS/TRAINING PROGRAMS</th>
+                                                    <th scope="col">TITLE OF LEARNING AND DEVELOPMENT
+                                                        INTERVENTIONS/TRAINING PROGRAMS</th>
                                                     <th scope="col">INCLUSIVE DATES OF ATTENDANCE FROM</th>
                                                     <th scope="col">INCLUSIVE DATES OF ATTENDANCE TO</th>
                                                     <th scope="col">NUMBER OF HOURS</th>
@@ -1646,7 +1805,8 @@
                                     <br>
 
                                     <hr style="margin: 0;">
-                                    <label for="" class="col-sm-12 col-form-label" style="font-size: 0.5em; color: red; font-style: italic;">
+                                    <label for="" class="col-sm-12 col-form-label"
+                                        style="font-size: 0.5em; color: red; font-style: italic;">
                                         <center>(Continue on separate sheet if necessary)</center>
                                     </label>
                                     <hr>
@@ -1658,7 +1818,8 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-1 col-form-label">SIGNATURE</label>
                                     <div class="col-sm-5">
-                                        <input type="file" class="form-control" id="C3_Signature" placeholder="C3_Signature">
+                                        <input type="file" class="form-control" id="C3_Signature"
+                                            placeholder="C3_Signature">
                                     </div>
 
                                     <label for="" class="col-sm-1 col-form-label">DATE</label>
@@ -1684,7 +1845,8 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">34.</label>
-                            <label for="" class="col-sm-6 col-form-label">Are you related by consanguinity or affinity to the appointing or recommending authority, or to the <br>
+                            <label for="" class="col-sm-6 col-form-label">Are you related by consanguinity or affinity
+                                to the appointing or recommending authority, or to the <br>
                                 Bureau or Department where you will be apppointed,
                             </label>
                             <label for="" class="col-sm-5 col-form-label"></label>
@@ -1712,7 +1874,8 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label"></label>
-                            <label for="" class="col-sm-6 col-form-label">b. within the fourth degree (for Local Government Unit - Career Employees)?
+                            <label for="" class="col-sm-6 col-form-label">b. within the fourth degree (for Local
+                                Government Unit - Career Employees)?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
 
@@ -1740,7 +1903,8 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">35.</label>
-                            <label for="" class="col-sm-6 col-form-label">a. Have you ever been found guilty of any administrative offense?
+                            <label for="" class="col-sm-6 col-form-label">a. Have you ever been found guilty of any
+                                administrative offense?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
                                 <input class="form-check-input" type="radio" name="AO" id="AOYes" value="Yes" checked>
@@ -1766,7 +1930,8 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label"></label>
-                            <label for="" class="col-sm-6 col-form-label">b. Have you been criminally charged before any court?
+                            <label for="" class="col-sm-6 col-form-label">b. Have you been criminally charged before any
+                                court?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
                                 <input class="form-check-input" type="radio" name="CC" id="CCYes" value="Yes" checked>
@@ -1810,7 +1975,8 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">36.</label>
-                            <label for="" class="col-sm-6 col-form-label">Have you ever been convicted of any crime or violation of any law, decree, ordinance or regulation by any court or tribunal?
+                            <label for="" class="col-sm-6 col-form-label">Have you ever been convicted of any crime or
+                                violation of any law, decree, ordinance or regulation by any court or tribunal?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
                                 <input class="form-check-input" type="radio" name="CoV" id="CoVYes" value="Yes" checked>
@@ -1837,12 +2003,15 @@
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">37.</label>
                             <label for="" class="col-sm-6 col-form-label">
-                                Have you ever been separated from the service in any of the following modes: resignation, retirement, dropped from the rolls, dismissal,
-                                termination, end of term, finished contract or phased out (abolition) in the public or private sector?
+                                Have you ever been separated from the service in any of the following modes:
+                                resignation, retirement, dropped from the rolls, dismissal,
+                                termination, end of term, finished contract or phased out (abolition) in the public or
+                                private sector?
 
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
-                                <input class="form-check-input" type="radio" name="SFTS" id="SFTSYes" value="Yes" checked>
+                                <input class="form-check-input" type="radio" name="SFTS" id="SFTSYes" value="Yes"
+                                    checked>
                                 <label class="form-check-label" for="SFTSYes">
                                     Yes
                                 </label>
@@ -1865,10 +2034,12 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">38.</label>
-                            <label for="" class="col-sm-6 col-form-label">a. Have you ever been a candidate in a national or local election held within the last year (except Barangay election)?
+                            <label for="" class="col-sm-6 col-form-label">a. Have you ever been a candidate in a
+                                national or local election held within the last year (except Barangay election)?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
-                                <input class="form-check-input" type="radio" name="CNOLE" id="CNOLEYes" value="Yes" checked>
+                                <input class="form-check-input" type="radio" name="CNOLE" id="CNOLEYes" value="Yes"
+                                    checked>
                                 <label class="form-check-label" for="CNOLEYes">
                                     Yes
                                 </label>
@@ -1889,7 +2060,9 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label"></label>
-                            <label for="" class="col-sm-6 col-form-label">b. Have you resigned from the government service during the three (3)-month period before the last election to promote/actively campaign for a national or local candidate?
+                            <label for="" class="col-sm-6 col-form-label">b. Have you resigned from the government
+                                service during the three (3)-month period before the last election to promote/actively
+                                campaign for a national or local candidate?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
                                 <input class="form-check-input" type="radio" name="RGS" id="RGSYes" value="Yes" checked>
@@ -1915,10 +2088,12 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">39.</label>
-                            <label for="" class="col-sm-6 col-form-label">Have you acquired the status of an immigrant or permanent resident of another country?
+                            <label for="" class="col-sm-6 col-form-label">Have you acquired the status of an immigrant
+                                or permanent resident of another country?
                             </label>
                             <div for="" class="col-sm-5 col-form-label">
-                                <input class="form-check-input" type="radio" name="SIoPS" id="SIoPSYes" value="Yes" checked>
+                                <input class="form-check-input" type="radio" name="SIoPS" id="SIoPSYes" value="Yes"
+                                    checked>
                                 <label class="form-check-label" for="SIoPSYes">
                                     Yes
                                 </label>
@@ -1942,7 +2117,9 @@
 
                         <div class="form-group row">
                             <label for="" class="col-sm-1 col-form-label">40.</label>
-                            <label for="" class="col-sm-6 col-form-label">Pursuant to: (a) Indigenous People's Act (RA 8371); (b) Magna Carta for Disabled Persons (RA 7277); and (c) Solo Parents Welfare Act of 2000 (RA 8972), please answer the following items:
+                            <label for="" class="col-sm-6 col-form-label">Pursuant to: (a) Indigenous People's Act (RA
+                                8371); (b) Magna Carta for Disabled Persons (RA 7277); and (c) Solo Parents Welfare Act
+                                of 2000 (RA 8972), please answer the following items:
                             </label>
                             <label for="" class="col-sm-5 col-form-label"></label>
                         </div>
@@ -2001,7 +2178,8 @@
                                         If Yes, please specify ID No:
                                     </div>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="PwDDetails" placeholder="PwDDetails">
+                                        <input type="text" class="form-control" id="PwDDetails"
+                                            placeholder="PwDDetails">
                                     </div>
                                 </div>
                             </div>
@@ -2045,7 +2223,8 @@
 
                                 <div class="form-group row">
                                     <label for="" class="col-sm-1">41.</label>
-                                    <label for="" class="col-sm-11">REFERENCES (Person not related by consanguinity or affinity to applicant /appointee)</label>
+                                    <label for="" class="col-sm-11">REFERENCES (Person not related by consanguinity or
+                                        affinity to applicant /appointee)</label>
                                 </div>
 
                                 <br>
@@ -2076,7 +2255,8 @@
                                     <div class="col-sm-4">
                                         <br>
                                         <label class="inputting" for="">ADDRESS</label>
-                                        <input type="text" class="form-control" id="RefAddress" placeholder="RefAddress">
+                                        <input type="text" class="form-control" id="RefAddress"
+                                            placeholder="RefAddress">
                                     </div>
 
                                     <div class="col-sm-4">
@@ -2123,7 +2303,13 @@
                                 <div class="form-group row">
                                     <label for="" class="col-sm-1">42.</label>
                                     <label for="" class="col-sm-11">
-                                        I declare under oath that I have personally accomplished this Personal Data Sheet which is a true, correct and complete statement pursuant to the provisions of pertinent laws, rules and regulations of the Republic of the Philippines. I authorize the agency head/authorized representative to verify/validate the contents stated herein. I agree that any misrepresentation made in this document and its attachments shall cause the filing of administrative/criminal case/s against me.
+                                        I declare under oath that I have personally accomplished this Personal Data
+                                        Sheet which is a true, correct and complete statement pursuant to the provisions
+                                        of pertinent laws, rules and regulations of the Republic of the Philippines. I
+                                        authorize the agency head/authorized representative to verify/validate the
+                                        contents stated herein. I agree that any misrepresentation made in this document
+                                        and its attachments shall cause the filing of administrative/criminal case/s
+                                        against me.
 
                                     </label>
                                 </div>
@@ -2151,7 +2337,8 @@
                                         <br>
                                         <br>
 
-                                        <input type="file" class="form-control" id="C4_Picture" placeholder="C4_Picture" name="C4_Picture">
+                                        <input type="file" class="form-control" id="C4_Picture" placeholder="C4_Picture"
+                                            name="C4_Picture">
 
                                     </div>
 
@@ -2169,7 +2356,8 @@
                             <div class="col-sm-4 border" style="padding: 15px;">
 
                                 <div class="form-group row">
-                                    <div class="col-sm-12">Government Issued ID (i.e.Passport, GSIS, SSS, PRC, Driver's License, etc.) <br> PLEASE INDICATE ID Number and Date of Issuance</div>
+                                    <div class="col-sm-12">Government Issued ID (i.e.Passport, GSIS, SSS, PRC, Driver's
+                                        License, etc.) <br> PLEASE INDICATE ID Number and Date of Issuance</div>
                                 </div>
 
                                 <br>
@@ -2196,7 +2384,8 @@
                                                 ID/License/Passport No.:
                                             </div>
                                             <div class="col-sm-7">
-                                                <input type="text" class="form-control" id="ID_L_PNO" placeholder="ID_L_PNO">
+                                                <input type="text" class="form-control" id="ID_L_PNO"
+                                                    placeholder="ID_L_PNO">
                                             </div>
                                         </div>
                                     </div>
@@ -2230,7 +2419,8 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <input type="file" class="form-control" id="C4_Signature" placeholder="C4_Signature" name="C4_Signature">
+                                        <input type="file" class="form-control" id="C4_Signature"
+                                            placeholder="C4_Signature" name="C4_Signature">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -2243,7 +2433,8 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <input type="date" class="form-control" id="C4_Date" placeholder="C4_Date" name="C4_Date">
+                                        <input type="date" class="form-control" id="C4_Date" placeholder="C4_Date"
+                                            name="C4_Date">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -2258,7 +2449,8 @@
 
                             <div class="col-sm-3 submit-button" style="position: relative;">
                                 <input type="hidden" name="info" id="info">
-                                <input type="button" id="Submit" class="btn btn-primary" style="bottom: 0; right: 0; position: absolute;" value="Submit">
+                                <input type="button" id="Submit" class="btn btn-primary"
+                                    style="bottom: 0; right: 0; position: absolute;" value="Submit">
                             </div>
                         </div>
                     </div>

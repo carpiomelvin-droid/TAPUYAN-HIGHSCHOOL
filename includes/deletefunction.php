@@ -11,35 +11,59 @@
  */
 function deleteEmployee($conn, $EmployeeID)
 {
+    $EmployeeID = (int) $EmployeeID;
+    if ($EmployeeID <= 0) {
+        return false;
+    }
 
-    // Start a transaction
-    $conn->autocommit(FALSE);
-    $success = true; // Flag to track success
+    if (!$conn->begin_transaction()) {
+        return false;
+    }
 
-    // 1. Delete from 'admin' table
-    $stmt1 = $conn->prepare("DELETE FROM admin WHERE EmployeeID = ?");
-    $stmt1->bind_param("i", $EmployeeID);
-    if (!$stmt1->execute()) $success = false;
-    $stmt1->close();
+    try {
+        // Check the account first so a missing ID is not reported as a success.
+        $checkStmt = $conn->prepare("SELECT EmployeeID FROM admin WHERE EmployeeID = ? LIMIT 1");
+        if (!$checkStmt) {
+            throw new RuntimeException($conn->error);
+        }
+        $checkStmt->bind_param("i", $EmployeeID);
+        if (!$checkStmt->execute() || !$checkStmt->get_result()->fetch_assoc()) {
+            $checkStmt->close();
+            throw new RuntimeException('Employee account not found.');
+        }
+        $checkStmt->close();
 
-    // 2. Delete from 'employee_details' table
-    $stmt2 = $conn->prepare("DELETE FROM employee_details WHERE EmployeeID = ?");
-    $stmt2->bind_param("i", $EmployeeID);
-    if (!$stmt2->execute()) $success = false;
-    $stmt2->close();
+        // Remove dependent rows explicitly; the foreign keys also cascade these rows.
+        foreach (['employee_details', 'employee_documents'] as $table) {
+            $stmt = $conn->prepare("DELETE FROM {$table} WHERE EmployeeID = ?");
+            if (!$stmt) {
+                throw new RuntimeException($conn->error);
+            }
+            $stmt->bind_param("i", $EmployeeID);
+            if (!$stmt->execute()) {
+                $error = $stmt->error;
+                $stmt->close();
+                throw new RuntimeException($error);
+            }
+            $stmt->close();
+        }
 
-    // 3. Delete from 'employee_documents' table
-    $stmt3 = $conn->prepare("DELETE FROM employee_documents WHERE EmployeeID = ?");
-    $stmt3->bind_param("i", $EmployeeID);
-    if (!$stmt3->execute()) $success = false;
-    $stmt3->close();
+        $accountStmt = $conn->prepare("DELETE FROM admin WHERE EmployeeID = ?");
+        if (!$accountStmt) {
+            throw new RuntimeException($conn->error);
+        }
+        $accountStmt->bind_param("i", $EmployeeID);
+        if (!$accountStmt->execute() || $accountStmt->affected_rows !== 1) {
+            $error = $accountStmt->error ?: 'Employee account could not be deleted.';
+            $accountStmt->close();
+            throw new RuntimeException($error);
+        }
+        $accountStmt->close();
 
-    // --- 4. Commit or Rollback ---
-    if ($success) {
-        $conn->commit(); // All deletes were successful
+        $conn->commit();
         return true;
-    } else {
-        $conn->rollback(); // Something failed, undo all changes
+    } catch (Throwable $exception) {
+        $conn->rollback();
         return false;
     }
 }

@@ -11,11 +11,11 @@ if ($EmployeeID == 0) {
 }
 
 // --- 2. Query 1: Get Details from 'admin' and 'employee_details' ---
-$sql_details = "SELECT * FROM 
+$sql_details = "SELECT * FROM
                     admin AS a
-                INNER JOIN 
+                INNER JOIN
                     employee_details AS d ON a.EmployeeID = d.EmployeeID
-                WHERE 
+                WHERE
                     a.EmployeeID = ?";
 
 $stmt_details = $conn->prepare($sql_details);
@@ -33,9 +33,10 @@ if (!$details) {
     exit;
 }
 
-// --- 3. Query 2: Get Document Status from 'employee_documents' ---
-$sql_docs = "SELECT 
+// --- 3. Query 2: Get Document Status from legacy 'employee_documents' ---
+$sql_docs = "SELECT
                 LENGTH(prc_file) as prc_file,
+                LENGTH(file_leave) as file_leave,
                 LENGTH(dll_file) as dll_file,
                 LENGTH(saln_file) as saln_file,
                 LENGTH(ipcr_file) as ipcr_file,
@@ -57,32 +58,56 @@ $result_docs = $stmt_docs->get_result();
 $documents = $result_docs->fetch_assoc();
 $stmt_docs->close();
 
+// --- 3.5. Query 3: Fetch multi-file records from new 'employee_document_files' table ---
+$multiFiles = [];
+$stmtMulti = $conn->prepare("SELECT file_id, doc_column, file_name, uploaded_at FROM employee_document_files WHERE EmployeeID = ? ORDER BY uploaded_at DESC");
+if ($stmtMulti) {
+    $stmtMulti->bind_param("i", $EmployeeID);
+    $stmtMulti->execute();
+    $resMulti = $stmtMulti->get_result();
+    while ($f = $resMulti->fetch_assoc()) {
+        $multiFiles[$f['doc_column']][] = [
+            'file_id' => (int) $f['file_id'],
+            'file_name' => mb_convert_encoding($f['file_name'], 'UTF-8', 'UTF-8'),
+            'uploaded_at' => $f['uploaded_at']
+        ];
+    }
+    $stmtMulti->close();
+}
+
 // Helper array to build the document table
 $doc_map = [
     'prc_file' => 'PRC',
-    'dll_file' => 'DLL (Daily Lesson Log)',
+    /* 'file_leave' => 'FILE LEAVE', */
+    'dll_file' => 'DLL',
     'saln_file' => 'SALN',
     'ipcr_file' => 'IPCR',
     'diploma_file' => 'Diploma',
     'tor_file' => 'Transcript of Records (TOR)',
-    'itr_file' => 'ITR (1st Copy)',
-    'itr_file_2' => 'ITR (2nd Copy)',
+    'itr_file' => 'ITR',
+    'itr_file_2' => 'ICS/RIS',
     'service_record_file' => 'Service Record',
     'appointment_file' => 'Appointment',
     'trainings_awards_file' => 'Trainings and Awards',
-    'pds_file' => 'PDS (Personal Data Sheet)',
+    'pds_file' => 'PDS',
     'ICS' => 'ICS(ICS)'
 ];
 
 // --- 4. Create the Avatar Source ---
-$avatar_src = "../path/to/default/avatar.png"; // A default placeholder
+$avatar_src = "../src/images/avatar.png"; // A default placeholder
 if (!empty($details['avatar_image']) && !empty($details['avatar_mime_type'])) {
     $avatar_src = "data:" . $details['avatar_mime_type'] . ";base64," . base64_encode($details['avatar_image']);
 }
 
 // --- 5. Get Admin's display name for the header ---
 $admin_display_name = $_SESSION['username'] ?? 'Admin';
-$AdminEmployeeID = $_SESSION['EmployeeID'] ?? 0;
+$AdminEmployeeID = (int) ($_SESSION['EmployeeID'] ?? 0);
+$isSuperadmin = ($_SESSION['role'] ?? '') === 'superadmin';
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$credentialResetStatus = $_GET['status'] ?? '';
+$credentialResetMessage = $_GET['message'] ?? '';
 $sql_admin_name = "SELECT name FROM employee_details WHERE EmployeeID = ? LIMIT 1";
 $stmt_admin_name = $conn->prepare($sql_admin_name);
 if ($stmt_admin_name) {
@@ -104,30 +129,37 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>View Employee: <?php echo htmlspecialchars($details['name']); ?></title>
     <style>
         :root {
-            --primary-color: #007bff;
-            --primary-hover: #0056b3;
-            --danger-color: #dc3545;
-            --danger-hover: #c82333;
-            --success-color: #28a745;
-            --success-hover: #218838;
-            --secondary-color: #6c757d;
-            --secondary-hover: #5a6268;
-            --info-color: #17a2b8;
-            --info-hover: #138496;
-            --light-bg: #f8f9fa;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --text-color: #343a40;
-            --text-muted: #6c757d;
-            --header-height: 60px;
-            --sidebar-bg: #2c3e50;
-            --sidebar-text: #ecf0f1;
-            --sidebar-hover: #34495e;
-            --sidebar-active: #007bff;
-            --sidebar-width: 240px;
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --info: #0ea5e9;
+            --info-hover: #0284c7;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
+
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -137,60 +169,45 @@ $conn->close();
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--light-bg);
-            color: var(--text-color);
-            line-height: 1.6;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* --- Main Header --- */
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            height: var(--header-height);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-logo strong {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-
-        .header-user span {
-            font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
         }
 
         /* --- Base Button Styles --- */
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
             text-decoration: none;
-            display: inline-block;
-            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             color: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
         }
 
         .btn-view {
-            background-color: var(--primary-color);
+            background-color: var(--accent-blue);
         }
 
         .btn-view:hover {
-            background-color: var(--primary-hover);
+            background-color: var(--accent-blue-hover);
         }
 
         .btn-success {
-            background-color: var(--success-color);
+            background-color: var(--success);
         }
 
         .btn-success:hover {
@@ -198,173 +215,232 @@ $conn->close();
         }
 
         .btn-secondary {
-            background-color: var(--secondary-color);
+            background-color: #ffffff;
+            color: var(--primary);
+            border: 1px solid var(--border-color);
         }
 
         .btn-secondary:hover {
-            background-color: var(--secondary-hover);
+            background-color: var(--bg-main);
+            color: var(--primary-light);
         }
 
-        .btn-info {
-            background-color: var(--info-color);
+        .btn-reset {
+            background-color: #b45309;
         }
 
-        .btn-info:hover {
-            background-color: var(--info-hover);
+        .btn-reset:hover {
+            background-color: #92400e;
         }
 
-        .btn-logout {
-            background: none;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-        }
-
-        .btn-logout:hover {
-            background: var(--danger-color);
-            color: #fff;
-        }
-
-        /* --- Admin Dashboard Layout (Grid) --- */
-        .admin-container {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            height: calc(100vh - var(--header-height));
-        }
-
-        /* --- Sidebar --- */
-        .admin-sidebar {
-            background-color: var(--sidebar-bg);
-            padding: 1.5rem 1rem;
-            height: 100%;
-            overflow-y: auto;
-        }
-
-        .sidebar-nav ul {
-            list-style: none;
-        }
-
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-nav a,
-        .sidebar-nav button {
-            display: block;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--sidebar-text);
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            background: none;
-            border: none;
-            text-align: left;
-            font-size: 1rem;
-            font-family: inherit;
-            cursor: pointer;
-        }
-
-        .sidebar-nav a:hover,
-        .sidebar-nav button:hover {
-            background-color: var(--sidebar-hover);
-        }
-
-        .sidebar-nav a.active {
-            background-color: var(--sidebar-active);
+        .reset-alert {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .85rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid;
+            font-size: .9rem;
             font-weight: 600;
         }
 
-        .sidebar-nav form .btn-logout {
-            width: 100%;
-            margin-top: 1rem;
-            text-align: left;
+        .reset-alert-success {
+            color: #166534;
+            background: #f0fdf4;
+            border-color: #bbf7d0;
         }
 
-        /* --- Main Content Area --- */
+        .reset-alert-error {
+            color: #991b1b;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+
+        .reset-modal-content form {
+            display: grid;
+            gap: .55rem;
+        }
+
+        .reset-modal-content label {
+            color: var(--text-muted);
+            font-size: .78rem;
+            font-weight: 700;
+            margin-top: .35rem;
+        }
+
+        .reset-modal-content input {
+            width: 100%;
+            padding: .7rem .8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-main);
+            font: inherit;
+        }
+
+        .reset-password-field {
+            position: relative;
+        }
+
+        .reset-password-field input {
+            padding-right: 2.75rem;
+        }
+
+        .reset-password-toggle {
+            position: absolute;
+            top: 50%;
+            right: .65rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .reset-password-toggle:hover,
+        .reset-password-toggle:focus-visible {
+            color: var(--accent-blue);
+        }
+
+        .reset-password-toggle:focus-visible {
+            outline: 2px solid rgba(37, 99, 235, .35);
+            outline-offset: 2px;
+            border-radius: 50%;
+        }
+
+        .reset-modal-content input:focus {
+            outline: 2px solid rgba(37, 99, 235, .2);
+            border-color: var(--accent-blue);
+        }
+
+        .reset-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: .65rem;
+            margin-top: 1rem;
+        }
+
+        /* --- Main Layout --- */
         .admin-content {
-            height: 100%;
-            overflow-y: auto;
-            padding: 2.5rem;
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
+            background: var(--bg-card);
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
         }
 
         .content-header h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--primary);
         }
 
         .content-header-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
-        /* --- Profile View --- */
+        /* --- Profile Structural Grid --- */
         .profile-view-container {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 340px 1fr;
             gap: 2rem;
             align-items: flex-start;
-            text-transform: uppercase;
         }
 
         .profile-view-sidebar {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 2.5rem 1.75rem;
             text-align: center;
+            border: 1px solid var(--border-color);
             position: sticky;
-            top: 0;
+            top: 2rem;
         }
 
         .avatar-preview {
-            width: 150px;
-            height: 150px;
-            border: 4px solid var(--border-color);
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 1rem;
+            border: 4px solid #fff;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 1.25rem;
+            transition: var(--transition);
         }
 
-        .profile-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            word-wrap: break-word;
+        .profile-view-sidebar:hover .avatar-preview {
+            transform: scale(1.03);
+        }
+
+        .profile-name-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
         }
 
         .profile-position {
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            font-weight: 700;
+            background-color: #eff6ff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: inline-block;
+            letter-spacing: 0.5px;
         }
 
         .profile-key-info {
             text-align: left;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
         }
 
         .profile-key-info div {
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            background: var(--bg-input);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
         }
 
         .profile-key-info label {
             display: block;
-            font-weight: 600;
-            color: var(--text-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
         }
 
         .profile-key-info span {
-            color: var(--text-muted);
+            color: var(--text-main);
+            font-weight: 600;
+            word-break: break-all;
         }
 
         .profile-view-details {
@@ -374,93 +450,136 @@ $conn->close();
         }
 
         .detail-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .detail-card:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         .detail-card h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.25rem 1.75rem;
+            background: #ffffff;
             border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .detail-card h2 i {
+            color: var(--accent-blue);
         }
 
         /* --- Read-only Data Grid --- */
         .detail-grid {
-            padding: 1.5rem;
+            padding: 1.75rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
         }
 
         .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-item label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            background: var(--bg-input);
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
             text-transform: uppercase;
         }
 
+        .detail-item:hover {
+            background: #ffffff;
+            border-color: var(--accent-blue);
+        }
+
+        .detail-item label {
+            font-size: 0.725rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
         .detail-item span {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-color);
-            word-wrap: break-word;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
         }
 
         .detail-item.full-width {
             grid-column: 1 / -1;
         }
 
-        /* --- Table Styles --- */
-        .employee-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* --- Document Management Table --- */
+        .table-responsive {
+            overflow-x: auto;
+            padding: 0.5rem;
         }
 
-        .employee-table th,
-        .employee-table td {
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border-color);
-            text-align: left;
+        .employee-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .employee-table th {
-            background-color: var(--light-bg);
-            font-size: 0.9rem;
-            font-weight: 600;
+            background: var(--bg-input);
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: var(--text-muted);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .employee-table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
         }
 
         .employee-table tbody tr:last-child td {
             border-bottom: none;
         }
 
+        .employee-table tbody tr:hover td {
+            background: var(--bg-input);
+        }
+
         /* --- Status Badges --- */
         .status-badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            padding: 0.3rem 0.75rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .status-uploaded {
-            color: var(--success-color);
-            background-color: #e9f5ec;
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .status-missing {
-            color: var(--danger-color);
-            background-color: #fbebee;
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .action-buttons {
@@ -468,13 +587,78 @@ $conn->close();
             gap: 0.5rem;
         }
 
-        /* --- NEW: Print-Only Header (Hidden on screen) --- */
+        .action-buttons .btn {
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            border-radius: var(--radius-sm);
+        }
+
+        /* --- Print Architecture --- */
         .print-header {
             display: none;
         }
 
-        /* --- Responsive --- */
-        @media (max-width: 1100px) {
+        /* --- Modal Styling for Multi-File Archive --- */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        .custom-modal-content {
+            background-color: var(--bg-card);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .custom-modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .custom-modal-close:hover {
+            color: var(--danger);
+        }
+
+        .archive-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-input);
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- Responsive Viewports --- */
+        @media (max-width: 1024px) {
             .profile-view-container {
                 grid-template-columns: 1fr;
             }
@@ -484,38 +668,16 @@ $conn->close();
             }
         }
 
-        @media (max-width: 900px) {
-            body {
-                overflow: auto;
-            }
-
-            .admin-container {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-
-            .admin-sidebar {
-                height: auto;
-                width: 100%;
-                display: flex;
-                overflow-x: auto;
-            }
-
-            .sidebar-nav ul {
-                display: flex;
-                gap: 0.5rem;
-            }
-
-            .admin-content {
-                height: auto;
-                padding: 1.5rem;
-            }
-        }
-
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             .content-header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .content-header-actions {
+                width: 100%;
+                flex-direction: column;
             }
 
             .detail-grid {
@@ -525,171 +687,86 @@ $conn->close();
             .action-buttons {
                 flex-direction: column;
             }
+
+            .admin-content {
+                padding: 1rem;
+            }
         }
 
-        /* --- @page rule to control print margins --- */
-        @page {
-            margin: 20mm;
-            /* Sets a 2cm margin */
-        }
-
-
-        /* --- UPDATED PRINT STYLES --- */
+        /* --- Print Enhancements --- */
         @media print {
 
-            /* Hide all UI elements */
             .main-header,
             .admin-sidebar,
             .content-header,
-            .profile-view-sidebar {
+            .profile-view-sidebar,
+            .action-buttons,
+            .custom-modal,
+            th:last-child,
+            td:last-child {
                 display: none !important;
             }
 
-            /* Hide the "Action" column AND the entire documents card */
-            .employee-table th:last-child,
-            .employee-table td:last-child,
-            .profile-view-details .detail-card:last-of-type {
-                display: none !important;
-            }
-
-            /* --- NEW: Show and style the print header --- */
             .print-header {
                 display: block;
                 text-align: center;
                 margin-bottom: 2rem;
-                border-bottom: 2px solid #ccc;
+                border-bottom: 2px solid #000;
                 padding-bottom: 1rem;
             }
 
-            .print-header h1 {
-                font-size: 20pt;
-                font-weight: 600;
-                color: #000;
-            }
-
-            .print-header p {
-                font-size: 14pt;
-                font-weight: 500;
-                margin: 0;
-            }
-
-            .print-header span {
-                font-size: 12pt;
-                color: #555;
-            }
-
-            /* Reset body for printing */
             body {
-                overflow: visible !important;
-                height: auto !important;
                 background-color: #fff !important;
-                font-family: 'Times New Roman', Times, serif;
-                /* Use a serif font for print */
+                font-family: 'Times New Roman', serif;
             }
 
-            /* Reset main containers */
-            .admin-container {
-                display: block !important;
-            }
-
-            .admin-content {
-                height: auto !important;
-                overflow: visible !important;
-                padding: 0 !important;
-            }
-
-            /* Make the details section full width */
             .profile-view-container {
                 display: block !important;
             }
 
-            .profile-view-details {
-                grid-column: 1 / -1;
-            }
-
-            /* --- NEW: Force 1-column layout for details --- */
             .detail-grid {
                 grid-template-columns: 1fr !important;
-                /* Stack all items */
-                gap: 1.25rem !important;
-                padding: 1.25rem !important;
+                gap: 1rem !important;
+                padding: 1rem !important;
             }
 
-            .detail-item label {
-                font-size: 10pt;
-                /* Smaller label */
-                color: #333;
-                margin-bottom: 2px;
-                text-transform: uppercase;
-            }
-
-            .detail-item span {
-                font-size: 12pt;
-                /* Larger, readable value */
-                font-weight: 600;
-                color: #000;
-            }
-
-            /* Style cards for printing */
             .detail-card {
                 box-shadow: none !important;
-                border: 1px solid #ccc !important;
+                border: 1px solid #000 !important;
                 page-break-inside: avoid;
                 margin-bottom: 1.5rem;
             }
 
             .detail-card h2 {
-                font-size: 14pt;
-                font-weight: 700;
-                background-color: #eee !important;
-                /* Light gray for section breaks */
-                color: #000;
-                padding: 0.5rem 1rem;
-            }
-
-            /* Ensure links are not blue */
-            a {
-                color: #000 !important;
-                text-decoration: none !important;
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 
 <body>
-    <header class="main-header">
-        <div class="header-logo">
-            <strong>Tapuyan NHS</strong> Admin Portal
-        </div>
-        <div class="header-user">
-            <span>Welcome, <?php echo htmlspecialchars($admin_display_name); ?>!</span>
-        </div>
-    </header>
+    <?php include_once '../includes/headeradmin.php'; ?>
 
     <div class="admin-container">
-
-        <aside class="admin-sidebar">
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="index.php" class="active">Dashboard</a></li>
-                    <li id="create-account"><button type="button" onclick="alert('Please go to the main dashboard to create an account.')">Create Employee</button></li>
-                    <li><a href="editadminaccount.php">Edit My Account</a></li>
-                    <li>
-                        <form action="../controllers/logout.php" method="post">
-                            <button type="submit" class="btn btn-logout">Logout</button>
-                        </form>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
         <main class="admin-content">
 
             <div class="content-header">
-                <h1><?php echo htmlspecialchars($details['name']); ?></h1>
-
+                <h1 style="text-transform: uppercase;">
+                    <?php echo htmlspecialchars($details['name']); ?>
+                </h1>
                 <div class="content-header-actions">
-                    <button type="button" class="btn btn-info" onclick="window.print()">Print Details</button>
+                    <a href="admin_download_pdf.php?id=<?php echo urlencode($EmployeeID); ?>" class="btn btn-success">
+                        <i class="fa-solid fa-file-pdf"></i> Download PDF
+                    </a>
+
+                    <?php if ($isSuperadmin && $details['role'] === 'staff'): ?>
+                        <button type="button" class="btn btn-reset" onclick="openResetModal()">
+                            <i class="fa-solid fa-key"></i> Reset Credentials
+                        </button>
+                    <?php endif; ?>
+
                     <a href="index.php" class="btn btn-secondary">&laquo; Back to Dashboard</a>
                 </div>
             </div>
@@ -698,8 +775,11 @@ $conn->close();
 
                 <aside class="profile-view-sidebar">
                     <img src="<?php echo $avatar_src; ?>" alt="Profile Avatar" class="avatar-preview">
-                    <h2 class="profile-name"><?php echo htmlspecialchars($details['name']); ?></h2>
-                    <p class="profile-position"><?php echo htmlspecialchars($details['position']); ?></p>
+                    <div class="profile-name-title"><!-- <?php echo htmlspecialchars($details['name']); ?> --></div>
+
+                    <p class="profile-position">
+                        <?php echo htmlspecialchars($details['position']); ?>
+                    </p>
 
                     <hr style="border:0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
 
@@ -723,10 +803,19 @@ $conn->close();
                     </div>
                 </aside>
 
+                <?php if ($credentialResetMessage !== ''): ?>
+                    <div
+                        class="reset-alert <?php echo $credentialResetStatus === 'success' ? 'reset-alert-success' : 'reset-alert-error'; ?>">
+                        <i
+                            class="fa-solid <?php echo $credentialResetStatus === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'; ?>"></i>
+                        <span><?php echo htmlspecialchars($credentialResetMessage); ?></span>
+                    </div>
+                <?php endif; ?>
+
                 <section class="profile-view-details">
 
                     <div class="detail-card">
-                        <h2>Personal Information</h2>
+                        <h2><i class="fa-solid fa-user"></i> Personal Information</h2>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <label>Full Name</label>
@@ -752,7 +841,7 @@ $conn->close();
                     </div>
 
                     <div class="detail-card">
-                        <h2>Employment Details</h2>
+                        <h2><i class="fa-solid fa-briefcase"></i> Employment Details</h2>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <label>Position</label>
@@ -763,8 +852,22 @@ $conn->close();
                                 <span><?php echo htmlspecialchars($details['subject_handled']); ?></span>
                             </div>
                             <div class="detail-item">
+                                <label>Educational Attainment</label>
+                                <span><?php echo htmlspecialchars($details['educational_attainment']); ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Eligibility</label>
+                                <span><?php echo htmlspecialchars($details['eligibility']); ?></span>
+                            </div>
+                            <div class="detail-item">
                                 <label>Basic Salary</label>
-                                <span><?php echo htmlspecialchars($details['basic_salary']); ?></span>
+                                <span>
+                                    <?php
+                                    echo !empty($details['basic_salary'])
+                                        ? '₱' . number_format((float) $details['basic_salary'], 2)
+                                        : '';
+                                    ?>
+                                </span>
                             </div>
                             <div class="detail-item">
                                 <label>Salary Grade</label>
@@ -794,7 +897,7 @@ $conn->close();
                     </div>
 
                     <div class="detail-card">
-                        <h2>IDs & Licenses</h2>
+                        <h2><i class="fa-solid fa-id-card"></i> IDs & Licenses</h2>
                         <div class="detail-grid">
                             <div class="detail-item">
                                 <label>GSIS Number</label>
@@ -824,44 +927,63 @@ $conn->close();
                     </div>
 
                     <div class="detail-card">
-                        <h2>Uploaded Documents</h2>
-                        <table class="employee-table">
-                            <thead>
-                                <tr>
-                                    <th>Document Name</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                if ($documents) {
-                                    foreach ($doc_map as $col_name => $display_name) {
-                                        echo "<tr>";
-                                        echo "<td>" . $display_name . "</td>";
+                        <h2><i class="fa-solid fa-folder-open"></i> Uploaded Documents</h2>
+                        <div class="table-responsive">
+                            <table class="employee-table">
+                                <thead>
+                                    <tr>
+                                        <th>Document Name</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($documents || !empty($multiFiles)) {
+                                        foreach ($doc_map as $col_name => $display_name) {
+                                            $files = $multiFiles[$col_name] ?? [];
+                                            $hasLegacy = isset($documents[$col_name]) && $documents[$col_name] > 0;
+                                            $totalCount = count($files) + ($hasLegacy && count($files) === 0 ? 1 : 0);
 
-                                        if (isset($documents[$col_name]) && $documents[$col_name] > 0) {
-                                            $view_link = "viewemployeedocument.php?id=" . $EmployeeID . "&doc=" . $col_name;
-                                            $download_link = "downloademployeedocument.php?id=" . $EmployeeID . "&doc=" . $col_name;
+                                            echo "<tr>";
+                                            echo "<td>" . htmlspecialchars($display_name) . "</td>";
 
-                                            echo '<td><span class="status-badge status-uploaded">Uploaded</span></td>';
+                                            if ($totalCount > 0) {
+                                                $statusText = $totalCount === 1 ? "Uploaded" : "Uploaded (" . $totalCount . " Files)";
+                                                echo '<td><span class="status-badge status-uploaded"><i class="fa-solid fa-circle-check"></i> ' . $statusText . '</span></td>';
+                                                echo '<td><div class="action-buttons">';
 
-                                            echo '<td><div class="action-buttons">';
-                                            echo '<a href="' . $view_link . '" target="_blank" class="btn btn-view">View</a>';
-                                            echo '<a href="' . $download_link . '" class="btn btn-success">Download</a>';
-                                            echo '</div></td>';
-                                        } else {
-                                            echo '<td><span class="status-badge status-missing">Not Uploaded</span></td>';
-                                            echo '<td>N/A</td>';
+                                                // Case 1: Only legacy file exists
+                                                if ($hasLegacy && count($files) === 0) {
+                                                    $view_link = "viewemployeedocument.php?id=" . $EmployeeID . "&doc=" . $col_name;
+                                                    $download_link = "downloademployeedocument.php?id=" . $EmployeeID . "&doc=" . $col_name;
+                                                    echo '<a href="' . $view_link . '" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>';
+                                                    echo '<a href="' . $download_link . '" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>';
+                                                }
+                                                // Case 2: Exactly 1 new file exists
+                                                else if (count($files) === 1 && !$hasLegacy) {
+                                                    $f = $files[0];
+                                                    echo '<a href="downloademployeedocument.php?file_id=' . $f['file_id'] . '&action=view" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>';
+                                                    echo '<a href="downloademployeedocument.php?file_id=' . $f['file_id'] . '&action=download" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>';
+                                                }
+                                                // Case 3: Multiple files exist (opens clean modal)
+                                                else {
+                                                    echo '<button type="button" class="btn btn-view btn-view-archive" data-col="' . htmlspecialchars($col_name, ENT_QUOTES) . '" data-label="' . htmlspecialchars($display_name, ENT_QUOTES) . '"><i class="fa-solid fa-folder-open"></i> View Files (' . $totalCount . ')</button>';
+                                                }
+                                                echo '</div></td>';
+                                            } else {
+                                                echo '<td><span class="status-badge status-missing"><i class="fa-solid fa-circle-xmark"></i> Missing</span></td>';
+                                                echo '<td><span style="color: var(--text-muted); font-size: 0.8rem;">N/A</span></td>';
+                                            }
+                                            echo "</tr>";
                                         }
-                                        echo "</tr>";
+                                    } else {
+                                        echo '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No document record found for this employee.</td></tr>';
                                     }
-                                } else {
-                                    echo '<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No document record found for this employee.</td></tr>';
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                 </section>
@@ -869,12 +991,168 @@ $conn->close();
             </div>
         </main>
     </div>
+
+    <!-- Multi-File Archive Modal -->
+    <div id="archiveModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <button type="button" class="custom-modal-close" onclick="closeArchiveModal()">&times;</button>
+            <h2 id="modalTitle" style="color: var(--primary); font-size: 1.2rem; margin-bottom: 0.25rem;">Uploaded Files
+                Archive</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">View or download files submitted under this
+                requirement category.</p>
+            <div id="archiveListContainer" class="archive-list"></div>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="button" class="btn btn-secondary" onclick="closeArchiveModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <?php if ($isSuperadmin && $details['role'] === 'staff'): ?>
+        <div id="resetCredentialsModal" class="custom-modal" role="dialog" aria-modal="true"
+            aria-labelledby="resetCredentialsTitle">
+            <div class="custom-modal-content reset-modal-content">
+                <button type="button" class="custom-modal-close" onclick="closeResetModal()"
+                    aria-label="Close reset credentials dialog">&times;</button>
+                <h2 id="resetCredentialsTitle" style="color: var(--primary); font-size: 1.2rem; margin-bottom: 0.25rem;">
+                    <i class="fa-solid fa-key" style="color: var(--accent-blue);"></i> Reset Employee Credentials
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Set a fresh username and password for this employee account.
+                </p>
+                <form action="../controllers/reset_employee_credentials.php" method="POST">
+                    <input type="hidden" name="EmployeeID" value="<?php echo (int) $EmployeeID; ?>">
+                    <input type="hidden" name="csrf_token"
+                        value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <label for="reset_username">New Username</label>
+                    <input id="reset_username" name="username" type="text" required minlength="3" maxlength="50"
+                        pattern="[A-Za-z0-9._-]{3,50}"
+                        value="<?php echo htmlspecialchars($details['username'], ENT_QUOTES, 'UTF-8'); ?>"
+                        autocomplete="off">
+                    <label for="reset_password">New Password</label>
+                    <div class="reset-password-field">
+                        <input id="reset_password" name="new_password" type="password" required minlength="6"
+                            autocomplete="new-password">
+                        <button type="button" class="reset-password-toggle" data-password-target="reset_password"
+                            aria-label="Show password" title="Show password"><i class="fa-solid fa-eye"
+                                aria-hidden="true"></i></button>
+                    </div>
+                    <label for="reset_confirm_password">Confirm New Password</label>
+                    <div class="reset-password-field">
+                        <input id="reset_confirm_password" name="confirm_password" type="password" required minlength="6"
+                            autocomplete="new-password">
+                        <button type="button" class="reset-password-toggle" data-password-target="reset_confirm_password"
+                            aria-label="Show password" title="Show password"><i class="fa-solid fa-eye"
+                                aria-hidden="true"></i></button>
+                    </div>
+                    <div class="reset-form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+                        <button type="submit" class="btn btn-reset"><i class="fa-solid fa-key"></i> Save
+                            Credentials</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="print-header">
         <h1>Employee Information Sheet</h1>
         <p><?php echo htmlspecialchars($details['name']); ?></p>
         <span><?php echo htmlspecialchars($details['position']); ?></span>
     </div>
 
+    <script>
+        const uploadedFiles = <?php echo json_encode(empty($multiFiles) ? new stdClass() : $multiFiles); ?>;
+        const legacyFiles = <?php echo json_encode(empty($documents) ? new stdClass() : $documents); ?>;
+        const employeeId = <?php echo (int) $EmployeeID; ?>;
+        const modal = document.getElementById('archiveModal');
+
+        function openArchiveModal(column, label) {
+            modal.style.display = 'block';
+            document.getElementById('modalTitle').textContent = label + ' - Uploaded Files';
+            const container = document.getElementById('archiveListContainer');
+            container.innerHTML = '';
+
+            const files = uploadedFiles[column] || [];
+            const hasLegacy = legacyFiles[column] && legacyFiles[column] > 0;
+
+            if (files.length === 0 && !hasLegacy) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:1rem;">No files found.</p>';
+                return;
+            }
+
+            files.forEach(f => {
+                const dateStr = f.uploaded_at ? new Date(f.uploaded_at).toLocaleDateString() : 'Recent upload';
+                const div = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `
+                    <div style="min-width:0; margin-right: 1rem;">
+                        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${f.file_name}"><i class="fa-solid fa-file-lines" style="color:var(--accent-blue); margin-right:6px;"></i> ${f.file_name}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Uploaded on ${dateStr}</div>
+                    </div>
+                    <div class="action-buttons" style="flex-shrink:0;">
+                        <a href="downloademployeedocument.php?file_id=${f.file_id}&action=view" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>
+                        <a href="downloademployeedocument.php?file_id=${f.file_id}&action=download" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (hasLegacy && files.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `
+                    <div style="min-width:0; margin-right: 1rem;">
+                        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main);"><i class="fa-solid fa-file-circle-check" style="color:var(--success); margin-right:6px;"></i> Archived Document</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Legacy system upload</div>
+                    </div>
+                    <div class="action-buttons" style="flex-shrink:0;">
+                        <a href="viewemployeedocument.php?id=${employeeId}&doc=${column}" target="_blank" class="btn btn-view"><i class="fa-solid fa-eye"></i> View</a>
+                        <a href="downloademployeedocument.php.php?id=${employeeId}&doc=${column}" class="btn btn-success"><i class="fa-solid fa-download"></i> Download</a>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function closeArchiveModal() {
+            modal.style.display = 'none';
+        }
+
+        const resetCredentialsModal = document.getElementById('resetCredentialsModal');
+
+        function openResetModal() {
+            if (!resetCredentialsModal) return;
+            resetCredentialsModal.style.display = 'block';
+        }
+
+        function closeResetModal() {
+            if (resetCredentialsModal) resetCredentialsModal.style.display = 'none';
+        }
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-view-archive');
+            if (btn) {
+                openArchiveModal(btn.getAttribute('data-col'), btn.getAttribute('data-label'));
+                return;
+            }
+            if (e.target === modal) closeArchiveModal();
+            if (e.target === resetCredentialsModal) closeResetModal();
+        });
+
+        document.querySelectorAll('.reset-password-toggle').forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.passwordTarget);
+                if (!input) return;
+
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                this.querySelector('i').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+                this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+                this.setAttribute('aria-pressed', String(isHidden));
+                this.title = isHidden ? 'Hide password' : 'Show password';
+            });
+        });
+    </script>
 </body>
 
 </html>

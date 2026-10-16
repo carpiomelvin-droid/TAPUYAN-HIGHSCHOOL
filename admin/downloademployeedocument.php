@@ -2,90 +2,110 @@
 session_start();
 include_once '../db/conn.php';
 
-// Security check: Ensure admin is logged in
+// --- 1. Security Check: Ensure admin is logged in ---
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'superadmin' && $_SESSION['role'] !== 'admin')) {
     die("Access Denied.");
 }
 
-// --- 1. Get and Validate Parameters ---
-$EmployeeID = $_GET['id'] ?? 0;
-$doc_col = $_GET['doc'] ?? ''; // e.g., 'prc_file'
+// --- 2. Get and Validate Parameters ---
+$file_id = isset($_GET['file_id']) ? (int) $_GET['file_id'] : 0;
+$action = isset($_GET['action']) && $_GET['action'] === 'view' ? 'view' : 'download';
 
-// List of allowed document column names to prevent SQL injection
-$allowed_cols = [
-    'prc_file',
-    'dll_file',
-    'saln_file',
-    'ipcr_file',
-    'diploma_file',
-    'tor_file',
-    'itr_file',
-    'itr_file_2',
-    'service_record_file',
-    'appointment_file',
-    'trainings_awards_file',
-    'pds_file',
-    'ICS'
-];
-
-if ($EmployeeID == 0 || !in_array($doc_col, $allowed_cols)) {
-    die("Error: Invalid document request.");
+if ($file_id <= 0) {
+    die("Error: Invalid file request.");
 }
 
-// --- 2. Get Employee Name (for the filename) ---
-$sql_name = "SELECT name FROM employee_details WHERE EmployeeID = ? LIMIT 1";
-$stmt_name = $conn->prepare($sql_name);
-$stmt_name->bind_param("i", $EmployeeID);
-$stmt_name->execute();
-$result_name = $stmt_name->get_result();
-$employee = $result_name->fetch_assoc();
-$stmt_name->close();
+// --- 3. Fetch File Record and Employee Name ---
+// Note: Assumes your BLOB column in 'employee_document_files' is named 'file_data'
+// (or 'file_blob' depending on your schema setup). Adjust the column name below if needed.
+$sql = "SELECT
+            f.file_name,
+            f.doc_column,
+            f.file_data,
+            e.name AS employee_name
+        FROM employee_document_files AS f
+        LEFT JOIN employee_details AS e ON f.EmployeeID = e.EmployeeID
+        WHERE f.file_id = ?
+        LIMIT 1";
 
-// Sanitize the name for a filename
-$employee_name = $employee ? preg_replace('/[^A-Za-z0-9_\-]/', '_', $employee['name']) : 'Employee';
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Database query preparation failed: " . $conn->error);
+}
 
-
-// --- 3. Fetch the File Blob ---
-// $doc_col is safe to use here because we validated it against the $allowed_cols array
-$sql_doc = "SELECT $doc_col FROM employee_documents WHERE EmployeeID = ? LIMIT 1";
-$stmt_doc = $conn->prepare($sql_doc);
-$stmt_doc->bind_param("i", $EmployeeID);
-$stmt_doc->execute();
-$result_doc = $stmt_doc->get_result();
-$file_data = $result_doc->fetch_assoc();
-$stmt_doc->close();
+$stmt->bind_param("i", $file_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$file_record = $result->fetch_assoc();
+$stmt->close();
 $conn->close();
 
-if (!$file_data || empty($file_data[$doc_col])) {
-    die("File not found or is empty.");
+if (!$file_record || empty($file_record['file_data'])) {
+    die("Error: File not found or empty in database archive.");
 }
 
-$file_blob = $file_data[$doc_col];
+$file_blob = $file_record['file_data'];
+$original_name = mb_convert_encoding($file_record['file_name'], 'UTF-8', 'UTF-8');
+$doc_col = $file_record['doc_column'];
+$emp_name = $file_record['employee_name'] ?? 'Employee';
 
-// --- 4. Determine File Extension (from blob data) ---
+// --- 4. Sanitize and Format Filename ---
+// Clean up employee name (e.g., "Juan Dela Cruz" -> "Juan_Dela_Cruz")
+$clean_emp_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $emp_name);
+$clean_doc_name = str_replace('_file', '', $doc_col);
+
+// If the original filename exists, attach it; otherwise, generate a standard name
+if (!empty($original_name)) {
+    $filename = $clean_emp_name . '_' . $clean_doc_name . '_' . preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $original_name);
+} else {
+    $filename = $clean_emp_name . '_' . $clean_doc_name . '.bin';
+}
+
+// --- 5. Determine Accurate MIME Type ---
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime_type = $finfo->buffer($file_blob);
 
-$ext = '.bin'; // default extension
-if (strpos($mime_type, 'pdf') !== false) {
-    $ext = '.pdf';
-} else if (strpos($mime_type, 'jpeg') !== false) {
-    $ext = '.jpg';
-} else if (strpos($mime_type, 'png') !== false) {
-    $ext = '.png';
-} else if (strpos($mime_type, 'gif') !== false) {
-    $ext = '.gif';
+// Fallback if finfo fails to return a valid MIME type
+if (empty($mime_type)) {
+    $mime_type = 'application/octet-stream';
 }
 
-// --- 5. Generate Filename and Send Headers ---
-$doc_name = str_replace('_file', '', $doc_col); // 'prc_file' -> 'prc'
-$filename = $employee_name . '_' . $doc_name . $ext; // e.g., "Juan_Dela_Cruz_prc.pdf"
+// Ensure proper extension exists if filename lacked one
+if (pathinfo($filename, PATHINFO_EXTENSION) === '') {
+    if (strpos($mime_type, 'pdf') !== false) {
+        $filename .= '.pdf';
+    } elseif (strpos($mime_type, 'jpeg') !== false) {
+        $filename .= '.jpg';
+    } elseif (strpos($mime_type, 'png') !== false) {
+        $filename .= '.png';
+    } elseif (strpos($mime_type, 'gif') !== false) {
+        $filename .= '.gif';
+    } elseif (strpos($mime_type, 'word') !== false || strpos($mime_type, 'officedocument') !== false) {
+        $filename .= '.docx';
+    } else {
+        $filename .= '.bin';
+    }
+}
 
-// Send headers to force download
-header("Content-Type: application/octet-stream");
-header("Content-Disposition: attachment; filename=\"$filename\"");
+// --- 6. Send HTTP Headers and Output Blob ---
+// Clear any output buffers to prevent corrupting binary files
+if (ob_get_level()) {
+    ob_end_clean();
+}
+
+header("Content-Type: " . $mime_type);
 header("Content-Length: " . strlen($file_blob));
+header("Cache-Control: private, max-age=0, must-revalidate");
+header("Pragma: public");
 
-// Output the file data
+// Switch between browser inline display (view) or attachment (download)
+if ($action === 'view') {
+    header("Content-Disposition: inline; filename=\"" . $filename . "\"");
+} else {
+    header("Content-Disposition: attachment; filename=\"" . $filename . "\"");
+}
+
+// Output file binary stream
 echo $file_blob;
 exit;
+?>

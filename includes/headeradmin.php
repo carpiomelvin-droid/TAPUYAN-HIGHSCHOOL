@@ -1,141 +1,209 @@
 <?php
-include_once '../db/conn.php';
+// No database include needed here
 ?>
-<header class="header-wrapper">
-    <img src="../src/images/bgpng.png" alt="Header Background" class="header-bg">
-
-    <div class="header-overlay"></div>
-
-    <div class="header-content">
-        <div class="header-text">
-            <h1>Admin Dashboard</h1>
-            <p>Manage employees and records efficiently</p>
-        </div>
-
-        <div class="header-welcome">
-            <span>
-                Welcome,
-                <?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?>!
-            </span>
-        </div>
-    </div>
-</header>
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-    .header-wrapper {
+    :root {
+        --border-color: #dee2e6;
+        --text-color: #343a40;
+        --text-muted: #6c757d;
+    }
+
+    /* HEADER */
+    .main-header {
         position: relative;
-        width: 100%;
-        height: 240px;
-        overflow: hidden;
-        border-radius: 0 0 20px 20px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-        margin-bottom: 1.5rem;
-        background: #000;
-    }
-
-    .header-bg {
-        width: 100%;
-        height: 100%;
-        object-fit: fill;
-        display: block;
-    }
-
-    .header-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg,
-                rgba(0, 0, 0, 0.65) 0%,
-                rgba(0, 0, 0, 0.35) 50%,
-                rgba(0, 0, 0, 0.2) 100%);
-        z-index: 1;
-    }
-
-    .header-content {
-        position: absolute;
-        inset: 0;
-        z-index: 2;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem 2rem;
-        color: #fff;
+        padding: 0 1.5rem;
+        height: 70px;
+        background: linear-gradient(135deg, #78a0e6ff, #edeb74ff);
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
     }
 
-    .header-text h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.4rem;
-        letter-spacing: 0.5px;
+    /* LEFT */
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
     }
 
-    .header-text p {
-        font-size: 0.95rem;
-        color: rgba(255, 255, 255, 0.85);
-        margin: 0;
+    .logo {
+        width: 60px;
+        height: auto;
     }
 
+    .header-logo {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .header-logo strong {
+        font-size: 1.1rem;
+    }
+
+    .header-logo span {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    /* NAV */
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .header-nav a,
+    .header-nav button,
     .header-welcome {
-        background: rgba(255, 255, 255, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        padding: 0.85rem 1.2rem;
-        border-radius: 12px;
-        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.55rem 0.9rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        color: var(--text-color);
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .header-nav a:hover,
+    .header-nav button:hover {
+        background: #faf60cff;
+    }
+
+    /* WELCOME */
+    .header-welcome {
+        cursor: default;
+        background: rgba(255, 255, 255, 0.35);
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        white-space: nowrap;
     }
 
-    @media (max-width: 768px) {
-        .header-wrapper {
-            height: 170px;
+    /* HAMBURGER */
+    .menu-toggle,
+    .mobile-message-link {
+        display: none;
+    }
+
+    .menu-toggle {
+        font-size: 1.3rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* MOBILE */
+    @media (max-width:768px) {
+        .menu-toggle {
+            display: block;
         }
 
-        .header-content {
+        .header-nav .mobile-message-link {
+            display: flex;
+        }
+
+        .header-nav {
+            position: absolute;
+            top: 70px;
+            right: 1rem;
+            width: 250px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+            padding: 12px;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.25rem 1.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: 0.2s;
+            z-index: 999;
         }
 
-        .header-text h1 {
-            font-size: 1.5rem;
+        .header-nav.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
-        .header-text p {
-            font-size: 0.85rem;
-        }
-
-        .header-welcome {
-            font-size: 0.9rem;
-            padding: 0.75rem 1rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .header-wrapper {
-            height: 150px;
-            border-radius: 0 0 14px 14px;
-        }
-
-        .header-content {
-            padding: 1rem;
-        }
-
-        .header-text h1 {
-            font-size: 1.2rem;
-        }
-
-        .header-text p {
-            font-size: 0.8rem;
-        }
-
+        .header-nav a,
+        .header-nav button,
         .header-welcome {
             width: 100%;
-            white-space: normal;
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width:425px) {
+        .main-header {
+            padding: 0 1rem;
+            height: 72px;
+        }
+
+        .logo {
+            width: 56px;
+        }
+
+        .header-logo strong {
+            font-size: 1rem;
+        }
+
+        .header-logo span {
+            font-size: 0.7rem;
+        }
+
+        .header-nav {
+            top: 72px;
+            right: 12px;
+            width: 220px;
+        }
+
+        .header-nav a,
+        .header-nav button,
+        .header-welcome {
             font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
         }
     }
 </style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tapuyan NHS - Employee Portal</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<header class="main-header">
+    <div class="header-left">
+        <img src="../src/images/logo.png" alt="Logo" class="logo">
+        <div class="header-logo">
+            <strong>Tapuyan National High School</strong>
+            <span>Admin Dashboard</span>
+        </div>
+    </div>
+
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle admin sidebar"
+        aria-controls="adminSidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</header>
+
+<script>
+    const toggleBtn = document.getElementById('menuToggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const sidebar = document.getElementById('adminSidebar');
+            if (!sidebar) return;
+            const isOpen = sidebar.classList.toggle('show');
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }
+</script>
