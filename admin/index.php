@@ -71,13 +71,49 @@ foreach ($announcementImageColumns as $columnName => $definition) {
         $conn->query("ALTER TABLE announcements ADD COLUMN {$columnName} {$definition}");
     }
 }
+$conn->query("CREATE TABLE IF NOT EXISTS announcement_images (
+    image_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    announcement_id INT UNSIGNED NOT NULL,
+    image_name VARCHAR(255) NULL,
+    image_data LONGBLOB NULL,
+    image_mime_type VARCHAR(150) NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (image_id),
+    KEY idx_announcement_images_announcement (announcement_id, sort_order, image_id),
+    CONSTRAINT fk_announcement_images_announcement FOREIGN KEY (announcement_id)
+        REFERENCES announcements (announcement_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+// Migrate legacy single images into the gallery (safe to run repeatedly).
+$conn->query("INSERT INTO announcement_images (announcement_id, image_name, image_data, image_mime_type, sort_order)
+    SELECT a.announcement_id, a.image_name, a.image_data, a.image_mime_type, 0
+    FROM announcements a
+    WHERE a.image_data IS NOT NULL
+      AND NOT EXISTS (
+          SELECT 1 FROM announcement_images gi WHERE gi.announcement_id = a.announcement_id
+      )");
 
-$announcementResult = $conn->query('SELECT announcement_id, title, category, body, external_url, file_name, image_name, is_published, created_at FROM announcements ORDER BY created_at DESC');
+$announcementResult = $conn->query('SELECT announcement_id, title, category, body, external_url, file_name, image_name, is_published, created_at, (SELECT COUNT(*) FROM announcement_images gi WHERE gi.announcement_id = announcements.announcement_id) AS image_count FROM announcements ORDER BY created_at DESC');
 if ($announcementResult) {
     while ($announcementRow = $announcementResult->fetch_assoc()) {
         $announcement_rows[] = $announcementRow;
         if ((int) $announcementRow['announcement_id'] === $announcement_edit_id) {
             $announcement_edit = $announcementRow;
+        }
+    }
+}
+
+// Batch-load gallery metadata (up to 10 per announcement) for cards + edit modal.
+$announcement_galleries = [];
+$galleryResult = $conn->query('SELECT image_id, announcement_id, image_name FROM announcement_images ORDER BY announcement_id ASC, sort_order ASC, image_id ASC');
+if ($galleryResult) {
+    while ($galleryRow = $galleryResult->fetch_assoc()) {
+        $galleryAnnouncementId = (int) $galleryRow['announcement_id'];
+        if (!isset($announcement_galleries[$galleryAnnouncementId])) {
+            $announcement_galleries[$galleryAnnouncementId] = [];
+        }
+        if (count($announcement_galleries[$galleryAnnouncementId]) < 10) {
+            $announcement_galleries[$galleryAnnouncementId][] = $galleryRow;
         }
     }
 }
@@ -95,6 +131,7 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* =========================================================
@@ -821,6 +858,277 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
             font-weight: 500;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .announcement-image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: .55rem;
+            margin-top: .6rem;
+        }
+
+        .announcement-image-preview-grid:empty {
+            display: none;
+        }
+
+        .announcement-preview-item {
+            position: relative;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .announcement-preview-item img {
+            display: block;
+            width: 100%;
+            height: 76px;
+            object-fit: cover;
+            background: #f8fafc;
+        }
+
+        .announcement-preview-item figcaption {
+            padding: .25rem .35rem;
+            font-size: .65rem;
+            font-weight: 600;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .announcement-preview-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, .75);
+            color: #fff;
+            font-size: .75rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .announcement-preview-remove:hover {
+            background: #dc2626;
+        }
+
+        .announcement-images-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+        }
+
+        .announcement-count-pill {
+            font-size: .72rem;
+            font-weight: 800;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            padding: .1rem .6rem;
+            white-space: nowrap;
+        }
+
+        .announcement-count-pill.is-full {
+            color: #b45309;
+            background: #fef3c7;
+            border-color: #fde68a;
+        }
+
+        .announcement-dropzone.is-dragover {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+        }
+
+        .announcement-inline-error {
+            margin-top: .45rem;
+            font-size: .78rem;
+            font-weight: 600;
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            padding: .45rem .6rem;
+        }
+
+        .announcement-clear-btn {
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            border-radius: 6px;
+            font-size: .75rem;
+            font-weight: 700;
+            padding: .35rem .6rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .announcement-clear-btn:hover {
+            color: #b91c1c;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .announcement-gallery-count {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .75rem;
+            font-weight: 700;
+            color: #475569;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            padding: .15rem .6rem;
+            margin-bottom: .5rem;
+        }
+
+        .admin-announce-banner {
+            position: relative;
+            display: block;
+            width: 100%;
+            height: 180px;
+            margin-bottom: .75rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #0f172a;
+            isolation: isolate;
+        }
+
+        .admin-announce-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: var(--ann-bg);
+            background-size: cover;
+            background-position: center;
+            filter: blur(18px) brightness(.65);
+            transform: scale(1.12);
+        }
+
+        .admin-announce-banner img {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform .25s ease;
+        }
+
+        .admin-announce-banner:hover img {
+            transform: scale(1.02);
+        }
+
+        .admin-announce-more {
+            position: absolute;
+            right: .5rem;
+            bottom: .5rem;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, .78);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .admin-announce-thumbs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+            gap: .4rem;
+            margin: -.25rem 0 .75rem;
+        }
+
+        .admin-announce-thumbs a {
+            display: block;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .admin-announce-thumbs img {
+            display: block;
+            width: 100%;
+            height: 52px;
+            object-fit: cover;
+            transition: transform .2s ease;
+        }
+
+        .admin-announce-thumbs a:hover img {
+            transform: scale(1.06);
+        }
+
+        .admin-card-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .att-file {
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: bottom;
+        }
+
+        .announcement-existing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+            gap: .5rem;
+            margin-top: .6rem;
+        }
+
+        .announcement-existing-item {
+            position: relative;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .announcement-existing-item img {
+            display: block;
+            width: 100%;
+            height: 72px;
+            object-fit: cover;
+        }
+
+        .announcement-existing-item label {
+            display: flex;
+            align-items: center;
+            gap: .3rem;
+            font-size: .7rem;
+            font-weight: 600;
+            color: #b91c1c;
+            padding: .3rem .4rem;
+            cursor: pointer;
+        }
+
+        .announcement-existing-item.is-marked {
+            border-color: #fca5a5;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, .15);
+        }
+
+        .announcement-existing-item.is-marked img {
+            opacity: .45;
+            filter: grayscale(40%);
         }
 
         .announcement-form-actions {
@@ -1572,17 +1880,32 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
                                             placeholder="https://example.com"
                                             value="<?php echo htmlspecialchars($announcement_edit['external_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"></label>
                                     <div class="announcement-file-field full-width">
-                                        <span>Optional announcement image</span>
-                                        <div class="announcement-file-wrapper">
-                                            <input id="announcement_image" class="announcement-file-input" type="file"
-                                                name="announcement_image" accept=".jpg,.jpeg,.png,.gif,.webp">
-                                            <label class="announcement-file-picker" for="announcement_image">
-                                                <i class="fa-solid fa-image" aria-hidden="true"></i>
-                                                <span>Choose image</span>
-                                            </label>
-                                            <span id="announcement-image-name" class="announcement-file-name">No image
-                                                selected</span>
+                                        <div class="announcement-images-head">
+                                            <span>Announcement images</span>
+                                            <span id="announcement-image-count"
+                                                class="announcement-count-pill">0 / 10</span>
                                         </div>
+                                        <div class="announcement-file-wrapper announcement-dropzone"
+                                            id="announcement-dropzone">
+                                            <input id="announcement_image" class="announcement-file-input" type="file"
+                                                name="announcement_images[]" accept=".jpg,.jpeg,.png,.gif,.webp"
+                                                multiple>
+                                            <label class="announcement-file-picker" for="announcement_image">
+                                                <i class="fa-solid fa-images" aria-hidden="true"></i>
+                                                <span>Choose images</span>
+                                            </label>
+                                            <span id="announcement-image-name" class="announcement-file-name">Drag
+                                                &amp; drop here or browse — select up to 10 images</span>
+                                            <button type="button" id="announcement-image-clear"
+                                                class="announcement-clear-btn" hidden>Clear all</button>
+                                        </div>
+                                        <div id="announcement-image-error" class="announcement-inline-error" role="alert"
+                                            hidden></div>
+                                        <div id="announcement-image-preview" class="announcement-image-preview-grid"
+                                            aria-live="polite"></div>
+                                        <small style="color:#64748b;">JPG, PNG, GIF, or WEBP · 5 MB max per image ·
+                                            10 images max per announcement. You can browse more than once — selections
+                                            accumulate.</small>
                                     </div>
                                     <div class="announcement-file-field full-width">
                                         <span>Optional attachment</span>
@@ -1677,10 +2000,42 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
                                             </div>
 
                                             <div class="admin-card-body">
-                                                <?php if (!empty($row['image_name'])): ?>
-                                                    <img src="../controllers/announcement_image.php?id=<?php echo (int) $row['announcement_id']; ?>"
-                                                        alt=""
-                                                        style="display:block; width:100%; height:180px; object-fit:contain; object-position:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:.75rem;">
+                                                <?php
+                                                $cardGallery = $announcement_galleries[(int) $row['announcement_id']] ?? [];
+                                                $cardHasLegacyImage = !empty($row['image_name']) && empty($cardGallery);
+                                                $cardMainUrl = !empty($cardGallery)
+                                                    ? '../controllers/announcement_image.php?image_id=' . (int) $cardGallery[0]['image_id']
+                                                    : ($cardHasLegacyImage
+                                                        ? '../controllers/announcement_image.php?id=' . (int) $row['announcement_id']
+                                                        : '');
+                                                $cardRest = !empty($cardGallery) ? array_slice($cardGallery, 1) : [];
+                                                ?>
+                                                <?php if ($cardMainUrl !== ''): ?>
+                                                    <a class="admin-announce-banner"
+                                                        href="<?php echo $cardMainUrl; ?>" target="_blank"
+                                                        rel="noopener"
+                                                        style="--ann-bg:url('<?php echo $cardMainUrl; ?>');"
+                                                        title="Click to view full image">
+                                                        <img src="<?php echo $cardMainUrl; ?>" alt="" loading="lazy">
+                                                        <?php if (count($cardGallery) > 1): ?>
+                                                            <span class="admin-announce-more"><i
+                                                                    class="fa-solid fa-images"></i>
+                                                                <?php echo count($cardGallery); ?></span>
+                                                        <?php endif; ?>
+                                                    </a>
+                                                    <?php if (!empty($cardRest)): ?>
+                                                        <div class="admin-announce-thumbs">
+                                                            <?php foreach ($cardRest as $galleryImage): ?>
+                                                                <?php $cardThumbUrl = '../controllers/announcement_image.php?image_id=' . (int) $galleryImage['image_id']; ?>
+                                                                <a href="<?php echo $cardThumbUrl; ?>" target="_blank"
+                                                                    rel="noopener"
+                                                                    title="<?php echo htmlspecialchars($galleryImage['image_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <img src="<?php echo $cardThumbUrl; ?>" alt=""
+                                                                        loading="lazy">
+                                                                </a>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                                 <h3 class="admin-card-title">
                                                     <?php echo htmlspecialchars($row['title']); ?>
@@ -1732,6 +2087,7 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
                                                         data-category="<?php echo htmlspecialchars($row['category'], ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-body="<?php echo htmlspecialchars($row['body'], ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-url="<?php echo htmlspecialchars($row['external_url'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-images='<?php echo htmlspecialchars(json_encode($announcement_galleries[(int) $row['announcement_id']] ?? []), ENT_QUOTES, 'UTF-8'); ?>'
                                                         data-file-name="<?php echo htmlspecialchars($row['file_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
@@ -1915,17 +2271,29 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
                             placeholder="https://example.com">
                     </label>
                     <div class="announcement-file-field full-width">
-                        <span>Optional replacement announcement image</span>
-                        <div class="announcement-file-wrapper">
-                            <input id="announcement-edit-image" class="announcement-file-input" type="file"
-                                name="announcement_image" accept=".jpg,.jpeg,.png,.gif,.webp">
-                            <label class="announcement-file-picker" for="announcement-edit-image">
-                                <i class="fa-solid fa-image" aria-hidden="true"></i>
-                                <span>Choose image</span>
-                            </label>
-                            <span id="announcement-edit-image-name" class="announcement-file-name">No replacement image
-                                selected</span>
+                        <div class="announcement-images-head">
+                            <span>Add more images</span>
+                            <span id="announcement-edit-count" class="announcement-count-pill">0 / 10</span>
                         </div>
+                        <div class="announcement-file-wrapper announcement-dropzone" id="announcement-edit-dropzone">
+                            <input id="announcement-edit-image" class="announcement-file-input" type="file"
+                                name="announcement_images[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple>
+                            <label class="announcement-file-picker" for="announcement-edit-image">
+                                <i class="fa-solid fa-images" aria-hidden="true"></i>
+                                <span>Choose images</span>
+                            </label>
+                            <span id="announcement-edit-image-name" class="announcement-file-name">Drag &amp; drop
+                                here or browse — up to 10 total</span>
+                            <button type="button" id="announcement-edit-clear" class="announcement-clear-btn"
+                                hidden>Clear new</button>
+                        </div>
+                        <div id="announcement-edit-error" class="announcement-inline-error" role="alert" hidden></div>
+                        <div id="announcement-edit-existing" class="announcement-existing-grid" aria-live="polite">
+                        </div>
+                        <div id="announcement-edit-preview" class="announcement-image-preview-grid"
+                            aria-live="polite"></div>
+                        <small style="color:#64748b;">Tick “Remove” under an existing image to delete it on
+                            save. New selections accumulate and count toward the 10-image limit.</small>
                     </div>
                     <div class="announcement-file-field full-width">
                         <span>Optional replacement attachment</span>
@@ -2029,6 +2397,7 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
         const announcementFileName = document.getElementById('announcement-file-name');
         const announcementImageInput = document.getElementById('announcement_image');
         const announcementImageName = document.getElementById('announcement-image-name');
+        const announcementImagePreview = document.getElementById('announcement-image-preview');
         const announcementEditModal = document.getElementById('announcement-edit-modal');
         const closeAnnouncementEditModal = document.getElementById('closeAnnouncementEditModal');
         const cancelAnnouncementEdit = document.getElementById('cancelAnnouncementEdit');
@@ -2036,11 +2405,286 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
         const announcementEditFileName = document.getElementById('announcement-edit-file-name');
         const announcementEditImageInput = document.getElementById('announcement-edit-image');
         const announcementEditImageName = document.getElementById('announcement-edit-image-name');
+        const announcementEditExisting = document.getElementById('announcement-edit-existing');
+        const announcementEditPreview = document.getElementById('announcement-edit-preview');
+        const announcementEditCount = document.getElementById('announcement-edit-count');
+        const announcementEditError = document.getElementById('announcement-edit-error');
+        const announcementEditClear = document.getElementById('announcement-edit-clear');
+        const announcementEditDropzone = document.getElementById('announcement-edit-dropzone');
+        const announcementImageCount = document.getElementById('announcement-image-count');
+        const announcementImageError = document.getElementById('announcement-image-error');
+        const announcementImageClear = document.getElementById('announcement-image-clear');
+        const announcementDropzone = document.getElementById('announcement-dropzone');
+
+        const ANNOUNCEMENT_MAX_IMAGES = 10;
+        const ANNOUNCEMENT_MAX_BYTES = 5 * 1024 * 1024;
+        const ANNOUNCEMENT_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        function formatBytes(bytes) {
+            if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+        }
+
+        function showPickerError(errorEl, message) {
+            if (!errorEl) return;
+            if (!message) {
+                errorEl.hidden = true;
+                errorEl.textContent = '';
+                return;
+            }
+            errorEl.hidden = false;
+            errorEl.textContent = message;
+        }
+
+        // Accumulating multi-image picker: repeated browse / drag-drop adds to
+        // the selection instead of replacing it. Syncs a DataTransfer into the
+        // real file input so normal form submission just works.
+        function initMultiImagePicker(options) {
+            const input = options.input;
+            if (!input) return null;
+            const dt = new DataTransfer();
+            const state = { files: [] };
+
+            function sync() {
+                input.files = dt.files;
+            }
+
+            function paint() {
+                const previewEl = options.preview;
+                const countEl = options.count;
+                const nameEl = options.name;
+                const clearBtn = options.clear;
+                const total = state.files.length + (options.extraCount ? options.extraCount() : 0);
+                if (previewEl) {
+                    previewEl.innerHTML = '';
+                    state.files.forEach((file, index) => {
+                        const item = document.createElement('figure');
+                        item.className = 'announcement-preview-item';
+                        const img = document.createElement('img');
+                        img.alt = file.name;
+                        img.title = file.name + ' (' + formatBytes(file.size) + ')';
+                        img.loading = 'lazy';
+                        img.src = URL.createObjectURL(file);
+                        img.onload = () => URL.revokeObjectURL(img.src);
+                        const caption = document.createElement('figcaption');
+                        caption.textContent = file.name;
+                        caption.title = file.name + ' (' + formatBytes(file.size) + ')';
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.className = 'announcement-preview-remove';
+                        removeBtn.setAttribute('aria-label', 'Remove ' + file.name);
+                        removeBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+                        removeBtn.addEventListener('click', () => removeAt(index));
+                        item.appendChild(img);
+                        item.appendChild(removeBtn);
+                        item.appendChild(caption);
+                        previewEl.appendChild(item);
+                    });
+                }
+                if (options.countMode === 'total') {
+                    if (countEl) {
+                        countEl.textContent = total + ' / ' + ANNOUNCEMENT_MAX_IMAGES;
+                        countEl.classList.toggle('is-full', total >= ANNOUNCEMENT_MAX_IMAGES);
+                    }
+                    if (nameEl) {
+                        nameEl.textContent = state.files.length
+                            ? state.files.length + ' new image' + (state.files.length > 1 ? 's' : '') + ' ready (' + total + '/10 total)'
+                            : (options.emptyHint || 'No new images selected');
+                    }
+                } else {
+                    if (countEl) {
+                        countEl.textContent = state.files.length + ' / ' + ANNOUNCEMENT_MAX_IMAGES;
+                        countEl.classList.toggle('is-full', state.files.length >= ANNOUNCEMENT_MAX_IMAGES);
+                    }
+                    if (nameEl) {
+                        nameEl.textContent = state.files.length
+                            ? state.files.length + ' image' + (state.files.length > 1 ? 's' : '') + ' selected — click Choose images or drop more to add'
+                            : (options.emptyHint || 'No images selected');
+                    }
+                }
+                if (clearBtn) clearBtn.hidden = state.files.length === 0;
+                if (options.onPaint) options.onPaint(state.files.length, total);
+            }
+
+            function removeAt(index) {
+                if (index < 0 || index >= state.files.length) return;
+                state.files.splice(index, 1);
+                try { dt.items.remove(index); } catch (e) { /* rebuild below */ }
+                // Rebuild DataTransfer to stay in sync (remove() support varies).
+                while (dt.items.length) { try { dt.items.remove(0); } catch (e) { break; } }
+                state.files.forEach(f => { try { dt.items.add(f); } catch (e) { } });
+                sync();
+                showPickerError(options.error, '');
+                paint();
+            }
+
+            function addFiles(fileList) {
+                const incoming = Array.from(fileList || []);
+                if (!incoming.length) return;
+                let message = '';
+                for (const file of incoming) {
+                    const currentTotal = state.files.length + (options.extraCount ? options.extraCount() : 0);
+                    if (currentTotal >= ANNOUNCEMENT_MAX_IMAGES) {
+                        message = 'Limit reached: an announcement can have up to 10 images. Remove one to add another.';
+                        break;
+                    }
+                    const typeOk = ANNOUNCEMENT_ALLOWED_TYPES.includes(file.type)
+                        || /\.(jpe?g|png|gif|webp)$/i.test(file.name || '');
+                    if (!typeOk) {
+                        message = '"' + (file.name || 'A file') + '" is not a JPG, PNG, GIF, or WEBP image and was skipped.';
+                        continue;
+                    }
+                    if (file.size <= 0 || file.size > ANNOUNCEMENT_MAX_BYTES) {
+                        message = '"' + (file.name || 'An image') + '" exceeds 5 MB and was skipped.';
+                        continue;
+                    }
+                    const duplicate = state.files.some(f => f.name === file.name && f.size === file.size);
+                    if (duplicate) continue;
+                    state.files.push(file);
+                    try { dt.items.add(file); } catch (e) { message = 'Your browser could not add more images.'; break; }
+                }
+                sync();
+                // Reset the raw input so choosing the same file again still fires change.
+                try { input.value = ''; } catch (e) { }
+                sync();
+                showPickerError(options.error, message);
+                paint();
+            }
+
+            function clear() {
+                state.files.length = 0;
+                while (dt.items.length) { try { dt.items.remove(0); } catch (e) { break; } }
+                try { input.value = ''; } catch (e) { }
+                sync();
+                showPickerError(options.error, '');
+                paint();
+            }
+
+            input.addEventListener('change', () => {
+                // `input.files` currently holds ONLY the just-picked batch because
+                // we clear input.value after every merge — merge it into the store.
+                addFiles(input.files);
+            });
+
+            const dropzone = options.dropzone;
+            if (dropzone) {
+                ['dragenter', 'dragover'].forEach(evt => dropzone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropzone.classList.add('is-dragover');
+                }));
+                ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    if (evt === 'dragleave' && dropzone.contains(e.relatedTarget)) return;
+                    dropzone.classList.remove('is-dragover');
+                }));
+                dropzone.addEventListener('drop', e => {
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                        addFiles(e.dataTransfer.files);
+                    }
+                });
+            }
+
+            if (options.clear) {
+                options.clear.addEventListener('click', clear);
+            }
+
+            paint();
+            return {
+                addFiles,
+                clear,
+                getNewCount: () => state.files.length,
+                getTotal: () => state.files.length + (options.extraCount ? options.extraCount() : 0),
+                sync,
+            };
+        }
+
+        const createPicker = initMultiImagePicker({
+            input: announcementImageInput,
+            preview: announcementImagePreview,
+            count: announcementImageCount,
+            name: announcementImageName,
+            error: announcementImageError,
+            clear: announcementImageClear,
+            dropzone: announcementDropzone,
+            countMode: 'new',
+            emptyHint: 'Drag & drop here or browse — select up to 10 images',
+        });
+
+        let editPicker = null;
 
         function closeAnnouncementEditor() {
             if (!announcementEditModal) return;
             announcementEditModal.style.display = 'none';
             announcementEditModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function editKeptCount() {
+            if (!announcementEditExisting) return 0;
+            const boxes = announcementEditExisting.querySelectorAll('input[type="checkbox"][name="delete_image_ids[]"]');
+            if (!boxes.length) return 0;
+            let kept = 0;
+            boxes.forEach(box => { if (!box.checked) kept += 1; });
+            return kept;
+        }
+
+        function refreshEditCount() {
+            const kept = editKeptCount();
+            const added = editPicker ? editPicker.getNewCount() : 0;
+            const total = kept + added;
+            if (announcementEditCount) {
+                announcementEditCount.textContent = total + ' / ' + ANNOUNCEMENT_MAX_IMAGES;
+                announcementEditCount.classList.toggle('is-full', total >= ANNOUNCEMENT_MAX_IMAGES);
+            }
+            if (announcementEditImageName && !(editPicker && editPicker.getNewCount())) {
+                announcementEditImageName.textContent = kept
+                    ? kept + ' existing image' + (kept > 1 ? 's' : '') + ' kept — add more or tick Remove'
+                    : 'Drag & drop here or browse — up to 10 total';
+            }
+        }
+
+        function renderExistingGallery(editButton) {
+            if (!announcementEditExisting) return;
+            announcementEditExisting.innerHTML = '';
+            let images = [];
+            try {
+                images = JSON.parse(editButton.dataset.images || '[]');
+            } catch (e) {
+                images = [];
+            }
+            if (!Array.isArray(images) || images.length === 0) {
+                announcementEditExisting.innerHTML = '<small style="color:#64748b;">No images yet. New uploads will be added on save.</small>';
+                refreshEditCount();
+                return;
+            }
+            const heading = document.createElement('small');
+            heading.style.color = '#475569';
+            heading.style.fontWeight = '700';
+            heading.textContent = 'Current images (' + images.length + '/10): tick Remove to delete on save.';
+            announcementEditExisting.appendChild(heading);
+            images.slice(0, 10).forEach(image => {
+                const item = document.createElement('div');
+                item.className = 'announcement-existing-item';
+                const img = document.createElement('img');
+                img.src = '../controllers/announcement_image.php?image_id=' + encodeURIComponent(image.image_id);
+                img.alt = image.image_name || '';
+                img.loading = 'lazy';
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'delete_image_ids[]';
+                checkbox.value = image.image_id;
+                checkbox.addEventListener('change', () => {
+                    item.classList.toggle('is-marked', checkbox.checked);
+                    showPickerError(announcementEditError, '');
+                    refreshEditCount();
+                });
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(' Remove'));
+                item.appendChild(img);
+                item.appendChild(label);
+                announcementEditExisting.appendChild(item);
+            });
+            refreshEditCount();
         }
 
         document.querySelectorAll('.announcement-edit-btn').forEach(button => {
@@ -2054,17 +2698,46 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
                 announcementEditFileName.textContent = this.dataset.fileName
                     ? `Current file: ${this.dataset.fileName}`
                     : 'No replacement selected';
+                // Reset the "new images" accumulator each time the modal opens.
+                if (editPicker) editPicker.clear();
+                else showPickerError(announcementEditError, '');
+                renderExistingGallery(this);
+                if (!editPicker) {
+                    editPicker = initMultiImagePicker({
+                        input: announcementEditImageInput,
+                        preview: announcementEditPreview,
+                        count: announcementEditCount,
+                        name: announcementEditImageName,
+                        error: announcementEditError,
+                        clear: announcementEditClear,
+                        dropzone: announcementEditDropzone,
+                        countMode: 'total',
+                        emptyHint: 'Drag & drop here or browse — up to 10 total',
+                        extraCount: editKeptCount,
+                    });
+                }
+                refreshEditCount();
                 announcementEditModal.style.display = 'flex';
                 announcementEditModal.setAttribute('aria-hidden', 'false');
                 document.getElementById('announcement-edit-title-input').focus();
             });
         });
 
-        if (announcementEditImageInput && announcementEditImageName) {
-            announcementEditImageInput.addEventListener('change', function () {
-                announcementEditImageName.textContent = this.files.length > 0
-                    ? this.files[0].name
-                    : 'No replacement image selected';
+        // Lazily init the edit picker on first modal open (above). If the modal
+        // is somehow submitted without it, fall back to native input behavior.
+        const announcementEditForm = document.querySelector('.announcement-modal-form');
+        if (announcementEditForm) {
+            announcementEditForm.addEventListener('submit', function (event) {
+                const kept = editKeptCount();
+                const added = editPicker ? editPicker.getNewCount()
+                    : (announcementEditImageInput && announcementEditImageInput.files
+                        ? announcementEditImageInput.files.length : 0);
+                if (kept + added > ANNOUNCEMENT_MAX_IMAGES) {
+                    event.preventDefault();
+                    showPickerError(announcementEditError,
+                        'Too many images: keep 10 or fewer in total (' + kept + ' kept + ' + added + ' new). Remove some first.');
+                    announcementEditModal.style.display = 'flex';
+                }
             });
         }
 
@@ -2087,11 +2760,8 @@ $activeAdminView = in_array($requested_view, ['announcements', 'personnel'], tru
             }
         });
 
-        if (announcementImageInput && announcementImageName) {
-            announcementImageInput.addEventListener('change', function () {
-                announcementImageName.textContent = this.files.length > 0 ? this.files[0].name : 'No image selected';
-            });
-        }
+        // The create + edit pickers handle image-input changes internally
+        // (accumulate / drag-drop / validation). Nothing more to wire here.
 
         if (announcementFileInput && announcementFileName) {
             announcementFileInput.addEventListener('change', function () {

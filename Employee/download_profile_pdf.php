@@ -155,6 +155,7 @@ $html = '
 <head>
     <meta charset="UTF-8">
     <title>Employee Information Sheet</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
     <style>
         @font-face {
             font-family: "UnifrakturMaguntia";

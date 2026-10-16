@@ -53,6 +53,7 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit My Account</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
     <style>
         :root {
             --danger-color: #dc3545;

@@ -42,6 +42,7 @@ $pageDescription = $isCreditsView
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?> | Tapuyan National High School</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
@@ -256,6 +257,60 @@ $pageDescription = $isCreditsView
             opacity: .45;
         }
 
+        .notice {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: 1rem;
+            padding: .7rem .9rem;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: .82rem;
+            font-weight: 600;
+        }
+
+        .notice.success {
+            color: #166534;
+            background: #dcfce7;
+            border-color: #bbf7d0;
+        }
+
+        .notice.error {
+            color: #991b1b;
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        .credit-input {
+            width: 84px;
+            padding: .4rem .5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font: inherit;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .credit-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+        }
+
+        .remaining {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
         @media (max-width: 900px) {
             body {
                 overflow: auto;
@@ -303,43 +358,73 @@ $pageDescription = $isCreditsView
 
         <section class="panel">
             <?php if ($isCreditsView): ?>
-                <div class="toolbar">
-                    <label class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="creditSearch" type="search"
-                            placeholder="Search employee"></label>
-                    <span id="creditPageInfo" class="page-info"></span>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Vacation</th>
-                                <th>Sick</th>
-                                <th>Other</th>
-                            </tr>
-                        </thead>
-                        <tbody id="creditTableBody">
-                            <?php if (!$rows): ?>
+                <?php $creditNotice = trim($_GET['message'] ?? ''); ?>
+                <?php if ($creditNotice !== ''): ?>
+                    <div style="padding:1rem 1.25rem 0;">
+                        <div class="notice <?php echo ($_GET['status'] ?? '') === 'success' ? 'success' : 'error'; ?>"
+                            role="status">
+                            <i
+                                class="fa-solid <?php echo ($_GET['status'] ?? '') === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'; ?>"></i>
+                            <?php echo htmlspecialchars($creditNotice); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <form action="../controllers/admin_leave_credits.php" method="post">
+                    <input type="hidden" name="leave_year" value="<?php echo $currentYear; ?>">
+                    <div class="toolbar">
+                        <label class="search"><i class="fa-solid fa-magnifying-glass"></i><input id="creditSearch"
+                                type="search" placeholder="Search employee"></label>
+                        <div class="toolbar-actions">
+                            <span id="creditPageInfo" class="page-info"></span>
+                            <button type="submit" class="button"><i class="fa-solid fa-floppy-disk"></i> Save
+                                Balances</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td colspan="4">No staff employees found.</td>
+                                    <th>Employee</th>
+                                    <th>Vacation (balance / total)</th>
+                                    <th>Sick (balance / total)</th>
+                                    <th>Other (balance / total)</th>
                                 </tr>
-                            <?php else:
-                                foreach ($rows as $credit): ?>
-                                    <tr
-                                        data-search="<?php echo htmlspecialchars(strtolower($credit['employee_name'] . ' ' . $credit['EmployeeID'])); ?>">
-                                        <td><?php echo htmlspecialchars($credit['employee_name']); ?></td>
-                                        <td><?php echo number_format(max(0, (float) $credit['vacation_entitlement'] - (float) $credit['vacation_used']), 2); ?>
-                                            remaining / <?php echo number_format((float) $credit['vacation_entitlement'], 2); ?>
-                                        </td>
-                                        <td><?php echo number_format(max(0, (float) $credit['sick_entitlement'] - (float) $credit['sick_used']), 2); ?>
-                                            remaining / <?php echo number_format((float) $credit['sick_entitlement'], 2); ?></td>
-                                        <td><?php echo number_format(max(0, (float) $credit['other_entitlement'] - (float) $credit['other_used']), 2); ?>
-                                            remaining / <?php echo number_format((float) $credit['other_entitlement'], 2); ?></td>
+                            </thead>
+                            <tbody id="creditTableBody">
+                                <?php if (!$rows): ?>
+                                    <tr>
+                                        <td colspan="4">No staff employees found.</td>
                                     </tr>
-                                <?php endforeach; endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                <?php else:
+                                    foreach ($rows as $credit):
+                                        $employeeId = (int) $credit['EmployeeID']; ?>
+                                        <tr
+                                            data-search="<?php echo htmlspecialchars(strtolower($credit['employee_name'] . ' ' . $credit['EmployeeID'])); ?>">
+                                            <td><?php echo htmlspecialchars($credit['employee_name']); ?></td>
+                                            <?php foreach (['vacation' => 'Vacation', 'sick' => 'Sick', 'other' => 'Other'] as $key => $label): ?>
+                                                <?php
+                                                $entitlement = (float) $credit[$key . '_entitlement'];
+                                                $used = (float) $credit[$key . '_used'];
+                                                ?>
+                                                <td>
+                                                    <span class="remaining"
+                                                        id="remaining-<?php echo $key . '-' . $employeeId; ?>"><?php echo number_format(max(0, $entitlement - $used), 2); ?></span>
+                                                    remaining /
+                                                    <input class="credit-input" type="number"
+                                                        name="credits[<?php echo $employeeId; ?>][<?php echo $key; ?>]"
+                                                        value="<?php echo htmlspecialchars(number_format($entitlement, 2, '.', '')); ?>"
+                                                        min="0" max="365" step="0.5" required
+                                                        data-employee="<?php echo $employeeId; ?>"
+                                                        data-type="<?php echo $key; ?>" data-used="<?php echo $used; ?>"
+                                                        aria-label="<?php echo $label; ?> total leave for <?php echo htmlspecialchars($credit['employee_name']); ?>">
+                                                </td>
+                                            <?php endforeach; ?>
+                                        </tr>
+                                    <?php endforeach; endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
                 <div class="pagination">
                     <button type="button" class="button" id="creditPrev"><i class="fa-solid fa-chevron-left"></i>
                         Previous</button>
@@ -422,6 +507,21 @@ $pageDescription = $isCreditsView
             previous.addEventListener('click', () => { page--; renderPage(); });
             next.addEventListener('click', () => { page++; renderPage(); });
             renderPage();
+
+            // Live remaining-balance preview as the admin types new totals.
+            document.querySelectorAll('.credit-input').forEach(input => {
+                input.addEventListener('input', () => {
+                    const used = parseFloat(input.dataset.used || '0');
+                    const total = parseFloat(input.value);
+                    const cell = document.getElementById(`remaining-${input.dataset.type}-${input.dataset.employee}`);
+                    if (!cell) return;
+                    if (Number.isNaN(total) || total < 0) {
+                        cell.textContent = '—';
+                        return;
+                    }
+                    cell.textContent = Math.max(0, total - used).toFixed(2);
+                });
+            });
         </script>
     <?php endif; ?>
 </body>

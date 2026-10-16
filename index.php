@@ -15,6 +15,26 @@ if ($landingResult) {
         $landingAnnouncements[] = $landingRow;
     }
 }
+// Batch-load up to 10 gallery images per landing announcement.
+$landingGalleries = [];
+if (!empty($landingAnnouncements)) {
+    $landingIds = array_values(array_unique(array_filter(array_map(static fn($row) => (int) $row['announcement_id'], $landingAnnouncements))));
+    if (!empty($landingIds)) {
+        $landingIdList = implode(',', $landingIds);
+        $landingGalleryResult = $conn->query("SELECT image_id, announcement_id, image_name FROM announcement_images WHERE announcement_id IN ({$landingIdList}) ORDER BY announcement_id ASC, sort_order ASC, image_id ASC");
+        if ($landingGalleryResult) {
+            while ($landingGalleryRow = $landingGalleryResult->fetch_assoc()) {
+                $landingGalleryAnnouncementId = (int) $landingGalleryRow['announcement_id'];
+                if (!isset($landingGalleries[$landingGalleryAnnouncementId])) {
+                    $landingGalleries[$landingGalleryAnnouncementId] = [];
+                }
+                if (count($landingGalleries[$landingGalleryAnnouncementId]) < 10) {
+                    $landingGalleries[$landingGalleryAnnouncementId][] = $landingGalleryRow;
+                }
+            }
+        }
+    }
+}
 function e(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -27,6 +47,7 @@ function e(string $value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome | Tapuyan NHS Employee Portal</title>
+    <link rel="icon" type="image/png" href="src/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
@@ -311,6 +332,91 @@ function e(string $value): string
 
         .info-card h3 i {
             color: var(--accent);
+        }
+
+        /* Announcement media: full-width banner + thumbnail strip */
+        .ann-media-banner {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            margin: .75rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            isolation: isolate;
+        }
+
+        .ann-media-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: var(--ann-bg);
+            background-size: cover;
+            background-position: center;
+            filter: blur(22px) brightness(.65);
+            transform: scale(1.12);
+        }
+
+        .ann-media-banner img {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .ann-media-banner:hover img {
+            transform: scale(1.01);
+        }
+
+        .ann-media-banner img {
+            transition: transform .25s ease;
+        }
+
+        .ann-media-count {
+            position: absolute;
+            right: .6rem;
+            bottom: .6rem;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, .75);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .ann-media-thumbs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: .5rem;
+            margin: 0 0 .75rem;
+        }
+
+        .ann-media-thumbs a {
+            display: block;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .ann-media-thumbs img {
+            display: block;
+            width: 100%;
+            height: 76px;
+            object-fit: cover;
+            transition: transform .2s ease;
+        }
+
+        .ann-media-thumbs a:hover img {
+            transform: scale(1.05);
         }
 
         /* ==========================================
@@ -797,10 +903,38 @@ function e(string $value): string
                             <?php echo e($landingAnnouncement['category']); ?>
                         </div>
                         <h3 style="margin:.5rem 0;"> <?php echo e($landingAnnouncement['title']); ?></h3>
-                        <?php if (!empty($landingAnnouncement['image_name'])): ?>
-                            <img src="controllers/announcement_image.php?id=<?php echo (int) $landingAnnouncement['announcement_id']; ?>"
-                                alt="<?php echo e($landingAnnouncement['title']); ?>"
-                                style="display:block; width:auto; max-width:100%; height:auto; max-height:480px; object-fit:contain; object-position:left center; background:#f8fafc; border:1px solid var(--border); border-radius:8px; margin:.75rem 0;">
+                        <?php
+                        $landingGallery = $landingGalleries[(int) $landingAnnouncement['announcement_id']] ?? [];
+                        $landingLegacyUrl = !empty($landingAnnouncement['image_name'])
+                            ? 'controllers/announcement_image.php?id=' . (int) $landingAnnouncement['announcement_id']
+                            : '';
+                        $landingMainUrl = !empty($landingGallery)
+                            ? 'controllers/announcement_image.php?image_id=' . (int) $landingGallery[0]['image_id']
+                            : $landingLegacyUrl;
+                        ?>
+                        <?php if ($landingMainUrl !== ''): ?>
+                            <a class="ann-media-banner" href="<?php echo $landingMainUrl; ?>" target="_blank"
+                                rel="noopener" style="--ann-bg:url('<?php echo $landingMainUrl; ?>');"
+                                title="Click to view full image">
+                                <img src="<?php echo $landingMainUrl; ?>"
+                                    alt="<?php echo e($landingAnnouncement['title']); ?>" loading="lazy">
+                                <?php if (count($landingGallery) > 1): ?>
+                                    <span class="ann-media-count"><i class="fa-solid fa-images"></i>
+                                        <?php echo count($landingGallery); ?> photos</span>
+                                <?php endif; ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (count($landingGallery) > 1): ?>
+                            <div class="ann-media-thumbs">
+                                <?php foreach (array_slice($landingGallery, 1) as $landingImage): ?>
+                                    <?php $thumbUrl = 'controllers/announcement_image.php?image_id=' . (int) $landingImage['image_id']; ?>
+                                    <a href="<?php echo $thumbUrl; ?>" target="_blank" rel="noopener"
+                                        title="<?php echo e($landingImage['image_name'] ?? ''); ?>">
+                                        <img src="<?php echo $thumbUrl; ?>"
+                                            alt="<?php echo e($landingAnnouncement['title']); ?>" loading="lazy">
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         <?php endif; ?>
                         <p style="color:var(--text-muted); white-space:pre-line;"><?php echo e($landingAnnouncement['body']); ?>
                         </p>

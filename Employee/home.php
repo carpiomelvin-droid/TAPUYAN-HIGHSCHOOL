@@ -37,6 +37,28 @@ if ($announcementResult) {
     }
 }
 
+// Batch-load up to 10 gallery images per published announcement.
+$announcementGalleries = [];
+if (!empty($announcements)) {
+    $announcementIds = array_map(static fn($row) => (int) $row['announcement_id'], $announcements);
+    $announcementIds = array_values(array_unique(array_filter($announcementIds)));
+    if (!empty($announcementIds)) {
+        $idList = implode(',', $announcementIds);
+        $galleryResult = $conn->query("SELECT image_id, announcement_id, image_name FROM announcement_images WHERE announcement_id IN ({$idList}) ORDER BY announcement_id ASC, sort_order ASC, image_id ASC");
+        if ($galleryResult) {
+            while ($galleryRow = $galleryResult->fetch_assoc()) {
+                $galleryAnnouncementId = (int) $galleryRow['announcement_id'];
+                if (!isset($announcementGalleries[$galleryAnnouncementId])) {
+                    $announcementGalleries[$galleryAnnouncementId] = [];
+                }
+                if (count($announcementGalleries[$galleryAnnouncementId]) < 10) {
+                    $announcementGalleries[$galleryAnnouncementId][] = $galleryRow;
+                }
+            }
+        }
+    }
+}
+
 $employeenumber = "";
 $details = [
     'employee_number' => '',
@@ -151,6 +173,7 @@ function format_currency_php($value)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Personnel Administration | Tapuyan National High School</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
@@ -422,6 +445,87 @@ function format_currency_php($value)
             border: 1px solid var(--border-color);
             border-radius: 8px;
             margin: .85rem 0 1rem;
+        }
+
+        .announcement-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: .5rem;
+            margin: 0 0 1rem;
+        }
+
+        .announcement-gallery a {
+            display: block;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        .announcement-gallery img {
+            display: block;
+            width: 100%;
+            height: 76px;
+            object-fit: cover;
+            transition: transform .2s ease;
+        }
+
+        .announcement-gallery a:hover img {
+            transform: scale(1.05);
+        }
+
+        .announcement-banner {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            margin: .85rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            isolation: isolate;
+        }
+
+        .announcement-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: var(--ann-bg);
+            background-size: cover;
+            background-position: center;
+            filter: blur(22px) brightness(.65);
+            transform: scale(1.12);
+        }
+
+        .announcement-banner img {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform .25s ease;
+        }
+
+        .announcement-banner:hover img {
+            transform: scale(1.01);
+        }
+
+        .announcement-photo-count {
+            position: absolute;
+            right: .6rem;
+            bottom: .6rem;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, .75);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
         }
 
         .announcement-card-body {
@@ -1106,10 +1210,40 @@ function format_currency_php($value)
                                     </div>
 
                                     <h2><?php echo esc($announcement['title']); ?></h2>
-                                    <?php if (!empty($announcement['image_name'])): ?>
-                                        <img class="announcement-card-image"
-                                            src="../controllers/announcement_image.php?id=<?php echo (int) $announcement['announcement_id']; ?>"
-                                            alt="<?php echo esc($announcement['title']); ?>">
+                                    <?php
+                                    $employeeGallery = $announcementGalleries[(int) $announcement['announcement_id']] ?? [];
+                                    $employeeLegacyUrl = !empty($announcement['image_name'])
+                                        ? '../controllers/announcement_image.php?id=' . (int) $announcement['announcement_id']
+                                        : '';
+                                    $employeeMainUrl = !empty($employeeGallery)
+                                        ? '../controllers/announcement_image.php?image_id=' . (int) $employeeGallery[0]['image_id']
+                                        : $employeeLegacyUrl;
+                                    ?>
+                                    <?php if ($employeeMainUrl !== ''): ?>
+                                        <a class="announcement-banner" href="<?php echo $employeeMainUrl; ?>"
+                                            target="_blank" rel="noopener"
+                                            style="--ann-bg:url('<?php echo $employeeMainUrl; ?>');"
+                                            title="Click to view full image">
+                                            <img src="<?php echo $employeeMainUrl; ?>"
+                                                alt="<?php echo esc($announcement['title']); ?>" loading="lazy">
+                                            <?php if (count($employeeGallery) > 1): ?>
+                                                <span class="announcement-photo-count"><i class="fa-solid fa-images"></i>
+                                                    <?php echo count($employeeGallery); ?> photos</span>
+                                            <?php endif; ?>
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if (count($employeeGallery) > 1): ?>
+                                        <div class="announcement-gallery">
+                                            <?php foreach (array_slice($employeeGallery, 1) as $galleryImage): ?>
+                                                <?php $employeeThumbUrl = '../controllers/announcement_image.php?image_id=' . (int) $galleryImage['image_id']; ?>
+                                                <a href="<?php echo $employeeThumbUrl; ?>" target="_blank"
+                                                    rel="noopener"
+                                                    title="<?php echo esc($galleryImage['image_name'] ?? ''); ?>">
+                                                    <img src="<?php echo $employeeThumbUrl; ?>"
+                                                        alt="<?php echo esc($announcement['title']); ?>" loading="lazy">
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                     <p><?php echo esc($announcement['body']); ?></p>
 

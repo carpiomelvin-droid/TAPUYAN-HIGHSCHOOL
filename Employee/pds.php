@@ -10,6 +10,7 @@
     <script defer src="assets/js/bootstrap.min.js"></script>
     <script defer src="assets/js/script.js"></script>
     <title>Personal Data Sheet</title>
+    <link rel="icon" type="image/png" href="../src/images/logo.png">
 
 </head>
 
